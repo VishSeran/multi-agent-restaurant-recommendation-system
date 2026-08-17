@@ -100,5 +100,12 @@ class DataExtractor:
         except Exception:
             logger.exception("Error in split_restaurant_data_into_list")
             raise
+        
+        
+    async def get_restaurant_data(self, data):
+        
+        try:
+            
+            
     
   
