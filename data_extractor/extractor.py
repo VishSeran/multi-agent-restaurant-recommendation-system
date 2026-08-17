@@ -7,6 +7,7 @@ from pathlib import Path
 from agents.llm_handler import LLMHandler
 from configurations.configs import Base_dir, RESTAURANT_DATA_SYS_PROMPT
 from configurations.logger import get_logger
+from schema.restaurant import Restaurant
 
 
 logger = get_logger('extractor')
@@ -113,8 +114,9 @@ class DataExtractor:
             if not data:
                 raise ValueError("restaurant data is missing")
             
+            structured_llm = self.llm.with_structured_output(Restaurant)
             
-            response = await self.llm.ainvoke({
+            response = await structured_llm.ainvoke({
                 "messages": [
                     {
                         "role": "system",
@@ -128,14 +130,9 @@ class DataExtractor:
                 ]
             })
             
+            logger.info("Response has fetched")
             content = response.content
-            
-            try:
-                return json.loads(content)
-            
-            except json.JSONDecodeError:
-                logger.error(f"LLM returned invalid JSON: {content}")
-                raise
+            return content
             
         except ValueError:
             logger.exception("Value error in get_restaurant_data")
@@ -161,7 +158,10 @@ class DataExtractor:
             file_path = dataset_dir / filename
             
             if file_path.exists():
-                raise RuntimeError("Error in get_restaurants_data: File is exists!!!")
+                logger.info(
+                    "Structured restaurant dataset already exists"
+                )
+                return self.read_file(file_path)
             
             for i,restaurant_data in enumerate(formatted_data):
                 
