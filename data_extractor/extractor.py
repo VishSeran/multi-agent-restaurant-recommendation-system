@@ -49,7 +49,7 @@ class DataExtractor:
                     
                 dataset_dir = Base_dir / "dataset"
                 dataset_dir.mkdir(parents=True, exist_ok=True)
-                file_download_path = dataset_dir / {self.file_name}
+                file_download_path = dataset_dir / self.file_name
                 
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     response = await client.get(self.url)
@@ -156,7 +156,7 @@ class DataExtractor:
             
             filename = "structured_restaurant_data.json"
             dataset_dir = Base_dir / "dataset"
-            dataset_dir.parent.mkdir(parents=True, exist_ok=True)
+            dataset_dir.mkdir(parents=True, exist_ok=True)
             
             file_path = dataset_dir / filename
             
