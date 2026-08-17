@@ -131,8 +131,7 @@ class DataExtractor:
             })
             
             logger.info("Response has fetched")
-            content = response.content
-            return content
+            return response
             
         except ValueError:
             logger.exception("Value error in get_restaurant_data")
@@ -169,7 +168,7 @@ class DataExtractor:
                 response = await self.get_restaurant_data(restaurant_data)
                 logger.info(f"restaurant {i+1} process is finished")
                 
-                restaurants_summary.append(response)
+                restaurants_summary.append(response.model_dump())
                 logger.info(f"completed: {i+1}/{total_len}")
             
             with open(file_path, "w", encoding="utf-8") as file:
