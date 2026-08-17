@@ -154,19 +154,29 @@ class DataExtractor:
             restaurants_summary = []
             total_len = len(formatted_data)
             
+            filename = "structured_restaurant_data.json"
+            dataset_dir = Base_dir / "dataset"
+            dataset_dir.parent.mkdir(parents=True, exist_ok=True)
+            
+            file_path = dataset_dir / filename
+            
+            if file_path.exists():
+                raise RuntimeError("Error in get_restaurants_data: File is exists!!!")
+            
             for i,restaurant_data in enumerate(formatted_data):
                 
                 logger.info(f"processing restaurant {i+1}")
-                response = self.get_restaurant_data(restaurant_data)
+                response = await self.get_restaurant_data(restaurant_data)
                 logger.info(f"restaurant {i+1} process is finished")
                 
                 restaurants_summary.append(response)
                 logger.info(f"completed: {i+1}/{total_len}")
             
-            
-                
-                
-            
+            with open(file_path, "w", encoding="utf-8") as file:
+                    json.dump(restaurants_summary, file,indent=4)
+                    
+            logger.info(f"{filename} is  created successfully")
+            return restaurants_summary
         
         except Exception:
             logger.exception("Error in get_restaurants_data")
