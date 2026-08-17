@@ -144,4 +144,31 @@ class DataExtractor:
         except Exception:
             logger.exception("Error in get_restaurant_data")
             raise
+        
+        
+    async def get_restaurants_data(self):
+        
+        try:
+            formatted_data = self.split_restaurant_data_into_list()
+            
+            restaurants_summary = []
+            total_len = len(formatted_data)
+            
+            for i,restaurant_data in enumerate(formatted_data):
+                
+                logger.info(f"processing restaurant {i+1}")
+                response = self.get_restaurant_data(restaurant_data)
+                logger.info(f"restaurant {i+1} process is finished")
+                
+                restaurants_summary.append(response)
+                logger.info(f"completed: {i+1}/{total_len}")
+            
+            
+                
+                
+            
+        
+        except Exception:
+            logger.exception("Error in get_restaurants_data")
+            raise
   
