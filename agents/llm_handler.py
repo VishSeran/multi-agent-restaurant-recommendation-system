@@ -48,6 +48,10 @@ class LLMHandler:
             raise
         
     
+    def get_llm(self) -> ChatGroq:
+        
+        return self.chat_groq
+    
     async def get_llm_response(self, query):
         
         try:
