@@ -9,14 +9,12 @@ from configurations.logger import get_logger
 
 logger = get_logger('extractor')
 
-
-
-
 class DataExtractor:
     
     def __init__(self, url: str | None, file_path:str | None, file_name: str | None):
         
         self.url = url
+        self.llm = 
         self.file_path = file_path     
         self.file_name = file_name
         self.data = None          
@@ -106,6 +104,17 @@ class DataExtractor:
         
         try:
             
+            if not data:
+                raise ValueError("restaurant data is missing")
             
-    
+            
+            
+            
+        except ValueError:
+            logger.exception("Value error in get_restaurant_data")
+            raise
+        
+        except Exception:
+            logger.exception("Error in get_restaurant_data")
+            raise
   
