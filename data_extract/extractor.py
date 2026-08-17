@@ -1,9 +1,11 @@
 
+import json
 from typing import Optional
 import httpx
 from pathlib import Path
 
-from configurations.configs import Base_dir
+from agents.llm_handler import LLMHandler
+from configurations.configs import Base_dir, RESTAURANT_DATA_SYS_PROMPT
 from configurations.logger import get_logger
 
 
@@ -14,7 +16,8 @@ class DataExtractor:
     def __init__(self, url: str | None, file_path:str | None, file_name: str | None):
         
         self.url = url
-        self.llm = 
+        llm_handler = LLMHandler()
+        self.llm = llm_handler.get_llm()
         self.file_path = file_path     
         self.file_name = file_name
         self.data = None          
@@ -34,6 +37,9 @@ class DataExtractor:
                     self.data = data
                     logger.info("Data loading is completed")
                     return
+                
+                elif not self.url:
+                        raise FileNotFoundError(f"File not found and no URL provided: {path}")
                         
             if self.url:
                 if not self.file_name:
@@ -108,7 +114,28 @@ class DataExtractor:
                 raise ValueError("restaurant data is missing")
             
             
+            response = await self.llm.ainvoke({
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": RESTAURANT_DATA_SYS_PROMPT
+                        
+                    },
+                    {
+                        "role": "user",
+                        "content": data
+                    }
+                ]
+            })
             
+            content = response.content
+            
+            try:
+                return json.loads(content)
+            
+            except json.JSONDecodeError:
+                logger.error(f"LLM returned invalid JSON: {content}")
+                raise
             
         except ValueError:
             logger.exception("Value error in get_restaurant_data")
