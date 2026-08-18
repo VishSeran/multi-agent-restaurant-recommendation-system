@@ -20,11 +20,10 @@ class DataExtractor:
         llm_handler = LLMHandler()
         logger.info("LLM handler connected to data extractor")
         
-        vision_handler = VisionLLMHandler()
+        self.vision_handler = VisionLLMHandler()
         logger.info("Vision handler connected to data extractor")
         
         self.llm = llm_handler.get_llm()
-        self.vision = vision_handler.vision_model()
         self.restaurants_data = None          
         self.food_recipe_data = None
         self.user_reviews = None
@@ -247,10 +246,25 @@ class DataExtractor:
         
         try:
             
+            food_recipes_list = json.loads(self.food_recipe_data)
+            logger.info("Food recipe list is imported")
+            
             for item in self.synthetic_recipe_images.iterdir():
                 
                 if item.is_file():
-                    img_data_url = visi
+                    img_data_url = self.vision_handler.img_to_data_url(item)
+                    logger.info(f"{item}'s data url has proccessed")
+                    
+                    img_caption = await self.vision_handler.get_vision_response(img_data_url)
+                    logger.info("Image caption has fetched")
+                    
+                    restaurant_summary[]
+                    
+                    
+                    
+                    
+                    
+                    
                     
             
         
