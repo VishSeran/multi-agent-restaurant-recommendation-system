@@ -77,3 +77,9 @@ Examples:
 - Spicy Beef Noodles
 - Chocolate Lava Cake
 """
+
+
+USER_CAP_PROMPT = """
+Analyze the attached food image and provide the most appropriate recipe title.
+Return only the title.
+"""

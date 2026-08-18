@@ -1,10 +1,12 @@
 import os
+from io import BytesIO
+import base64
 
 from PIL import Image
 import dotenv
 from langchain_groq import ChatGroq
 
-from configurations.configs import SYS_CAP_PROMPT, VISION_MODEL
+from configurations.configs import SYS_CAP_PROMPT, VISION_MODEL, USER_CAP_PROMPT
 from configurations.logger import get_logger
 
 logger = get_logger("vision-llm")
@@ -45,7 +47,19 @@ class VisionLLMHandler:
             if not img_path:
                 raise ValueError("Image path is missing")
             
+            buffer = BytesIO()
+            img = Image.open(img_path).convert("RGB")
+            img.save(buffer,"JPEG")
             
+            logger.info("image saved successfully in the buffer")
+            
+            encode_data = base64.b64encode(buffer.getvalue()).decode(encoding="utf-8")
+            
+            return f"data:image/jpeg;base64,{encode_data}" 
+
+        except ValueError:
+            logger.exception("Value error in get_vision_response")
+            raise
         
         except Exception:
             logger.exception("Error in img to data url")
@@ -53,15 +67,16 @@ class VisionLLMHandler:
     
             
     
-    async def get_vision_response(self, img_path):
+    async def get_vision_response(self, img_data_url):
         
         try:
             
-            if not img_path:
+            if not img_data_url:
                 raise ValueError("image data is missing")
             
             
             response = await self.vision_model.ainvoke({
+                
                 "messages": [
                     {
                         "role": "system",
@@ -69,10 +84,24 @@ class VisionLLMHandler:
                     },
                     {
                         "role": "user",
-                        "content": img_path
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": USER_CAP_PROMPT
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": img_data_url
+                                }
+                            }
+                        ]
                     }
                 ]
             })
+            
+            logger.info("Response has fetched")
+            return response
         
         except ValueError:
             logger.exception("Value error in get_vision_response")
