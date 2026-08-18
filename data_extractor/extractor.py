@@ -1,5 +1,7 @@
 import json
 from pathlib import Path
+from typing import Literal
+import zipfile
 
 import httpx
 
@@ -12,20 +14,23 @@ logger = get_logger('extractor')
 
 class DataExtractor:
     
-    def __init__(self, url: str | None, file_path:str | None, file_name: str | None):
+    def __init__(self):
         
         llm_handler = LLMHandler()
         self.llm = llm_handler.get_llm()
         self.restaurants_data = None          
         self.food_recipe_data = None
         self.user_reviews = None
-        self.synthetic_recipes = None
+        self.synthetic_recipe_images = None
         
     async def load_dataset(self, 
                            file_path:str | None,
                            file_name:str |None ,
                            url:str| None, 
-                           directory:str):
+                           directory:Literal["restaurants", 
+                                             "food_recipes", 
+                                             "user_reviews", 
+                                             "synthetic_recipe_images"]):
         
         try:
             
@@ -37,7 +42,18 @@ class DataExtractor:
                 path = Path(file_path).resolve()
                 if path.exists():
                     data = self.read_file(path)
-                    self.restaurants_data = data
+                    
+                    if path.parent.name == "restaurants":
+                        self.restaurants_data = data
+                    elif path.parent.name == "food_recipes":
+                        self.food_recipe_data = data
+                    elif path.parent.name == "user_reviews":
+                        self.user_reviews = data
+                    elif path.parent.name == "synthetic_recipe_images":
+                        self.synthetic_recipe_images = data
+                    else:
+                        raise RuntimeError(f"{directory} is not a supported dataset directory")
+                    
                     logger.info("Data loading is completed")
                     return
                 
@@ -65,7 +81,19 @@ class DataExtractor:
                         
                     logger.info("File is created")
                     
-                self.restaurants_data = self.read_file(file_download_path)
+                data = self.read_file(file_download_path)
+                
+                if directory == "restaurants":
+                    self.restaurants_data = data
+                elif directory == "food_recipes":
+                    self.food_recipe_data = data
+                elif directory == "user_reviews":
+                    self.user_reviews = data
+                elif directory == "synthetic_recipe_images":
+                    self.synthetic_recipe_images = data
+                else:
+                    raise RuntimeError(f"{directory} is not a supported dataset directory")
+                
                 logger.info("Data loading is completed")
                 return
       
@@ -77,8 +105,26 @@ class DataExtractor:
             logger.exception("Error in load_dataset")
             raise
         
-    def  read_file(self, path):
-    
+    def  read_file(self, path:Path):
+        
+        if path.name.endswith(".zip"):
+            
+            extract_dir = path.parent / path.stem
+            extract_dir.mkdir(parents=True, exist_ok=True)
+            
+            with zipfile.ZipFile(path, "r") as zip_file:
+                zip_file.extractall(extract_dir)
+                
+            logger.info(f"ZIP file extracted to: {extract_dir}")
+            return extract_dir
+        
+        
+        if path.name.endswith(".rar"):
+            raise NotImplementedError(
+                "RAR files are not currently supported"
+            )
+
+        
         with open(path, "r", encoding="utf-8") as file:
             data = file.read()
             if not data:
@@ -185,5 +231,5 @@ class DataExtractor:
         
         
         
-    async 
+    async def 
   
