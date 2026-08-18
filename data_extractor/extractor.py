@@ -8,6 +8,7 @@ import httpx
 from llms.llm_handler import LLMHandler
 from configurations.configs import RESTAURANT_DATA_SYS_PROMPT, Base_dir
 from configurations.logger import get_logger
+from llms.vision_llm_handler import VisionLLMHandler
 from schema.restaurant import Restaurant
 
 logger = get_logger('extractor')
@@ -17,6 +18,11 @@ class DataExtractor:
     def __init__(self):
         
         llm_handler = LLMHandler()
+        logger.info("LLM handler connected to data extractor")
+        
+        self.vision_handler = VisionLLMHandler()
+        logger.info("Vision handler connected to data extractor")
+        
         self.llm = llm_handler.get_llm()
         self.restaurants_data = None          
         self.food_recipe_data = None
@@ -64,6 +70,11 @@ class DataExtractor:
                 if not file_name:
                     raise ValueError(
                         "File path must be provided when downloading data"
+                    )
+                    
+                if not directory:
+                    raise ValueError(
+                        "Directory must be provided when downloading data"
                     )
                     
                 dataset_dir = Base_dir / "dataset"/ directory
@@ -231,5 +242,33 @@ class DataExtractor:
         
         
         
-    async def 
+    async def combine_food_recipe_data_with_image_description(self):
+        
+        try:
+            
+            food_recipes_list = json.loads(self.food_recipe_data)
+            logger.info("Food recipe list is imported")
+            
+            for item in self.synthetic_recipe_images.iterdir():
+                
+                if item.is_file():
+                    img_data_url = self.vision_handler.img_to_data_url(item)
+                    logger.info(f"{item}'s data url has proccessed")
+                    
+                    img_caption = await self.vision_handler.get_vision_response(img_data_url)
+                    logger.info("Image caption has fetched")
+                    
+                    restaurant_summary[]
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+            
+        
+        except Exception:
+            logger.exception("Error in combine_food_recipe_data_with_image_description")
+            raise
   

@@ -8,6 +8,7 @@ from langchain_groq import ChatGroq
 
 from configurations.configs import SYS_CAP_PROMPT, VISION_MODEL, USER_CAP_PROMPT
 from configurations.logger import get_logger
+from schema.image_caption import ImageCaptionSchema
 
 logger = get_logger("vision-llm")
 dotenv.load_dotenv()
@@ -30,6 +31,8 @@ class VisionLLMHandler:
                 max_tokens=4000,
                 verbose=True
             )
+            
+            self.vision_structured_model = self.vision_model.with_structured_output(ImageCaptionSchema)
             
             logger.info("Vision model is initialized")
             
@@ -75,7 +78,7 @@ class VisionLLMHandler:
                 raise ValueError("image data is missing")
             
             
-            response = await self.vision_model.ainvoke({
+            response = await self.vision_structured_model.ainvoke({
                 
                 "messages": [
                     {
@@ -110,6 +113,9 @@ class VisionLLMHandler:
         except Exception:
             logger.exception("Error in get_vision_response")
             raise
+        
+        
+    
         
         
     
