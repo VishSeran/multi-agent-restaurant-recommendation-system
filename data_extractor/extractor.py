@@ -1,14 +1,12 @@
-
 import json
-from typing import Optional
-import httpx
 from pathlib import Path
 
+import httpx
+
 from agents.llm_handler import LLMHandler
-from configurations.configs import Base_dir, RESTAURANT_DATA_SYS_PROMPT
+from configurations.configs import RESTAURANT_DATA_SYS_PROMPT, Base_dir
 from configurations.logger import get_logger
 from schema.restaurant import Restaurant
-
 
 logger = get_logger('extractor')
 

@@ -1,12 +1,11 @@
 import os
-import dotenv
 
+import dotenv
 from langchain_groq import ChatGroq
 from langgraph.checkpoint.memory import InMemorySaver
 
 from configurations.configs import GROQ_MODEL
 from configurations.logger import get_logger
-
 
 logger = get_logger("llm-handler")
 
