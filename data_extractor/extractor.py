@@ -1,9 +1,11 @@
 import json
 from pathlib import Path
+from typing import Literal
+import zipfile
 
 import httpx
 
-from agents.llm_handler import LLMHandler
+from llms.llm_handler import LLMHandler
 from configurations.configs import RESTAURANT_DATA_SYS_PROMPT, Base_dir
 from configurations.logger import get_logger
 from schema.restaurant import Restaurant
@@ -12,46 +14,64 @@ logger = get_logger('extractor')
 
 class DataExtractor:
     
-    def __init__(self, url: str | None, file_path:str | None, file_name: str | None):
+    def __init__(self):
         
-        self.url = url
         llm_handler = LLMHandler()
         self.llm = llm_handler.get_llm()
-        self.file_path = file_path     
-        self.file_name = file_name
-        self.data = None          
-
-    async def load_dataset(self):
+        self.restaurants_data = None          
+        self.food_recipe_data = None
+        self.user_reviews = None
+        self.synthetic_recipe_images = None
+        
+    async def load_dataset(self, 
+                           file_path:str | None,
+                           file_name:str |None ,
+                           url:str| None, 
+                           directory:Literal["restaurants", 
+                                             "food_recipes", 
+                                             "user_reviews", 
+                                             "synthetic_recipe_images"]):
         
         try:
             
-            if not self.url and not self.file_path:
+            if not url and not file_path:
                 raise ValueError("Error in data loading, At leaset URL or File Path must be provided!!!")
             
-            if self.file_path:
+            if file_path:
                 
-                path = Path(self.file_path).resolve()
+                path = Path(file_path).resolve()
                 if path.exists():
                     data = self.read_file(path)
-                    self.data = data
+                    
+                    if path.parent.name == "restaurants":
+                        self.restaurants_data = data
+                    elif path.parent.name == "food_recipes":
+                        self.food_recipe_data = data
+                    elif path.parent.name == "user_reviews":
+                        self.user_reviews = data
+                    elif path.parent.name == "synthetic_recipe_images":
+                        self.synthetic_recipe_images = data
+                    else:
+                        raise RuntimeError(f"{directory} is not a supported dataset directory")
+                    
                     logger.info("Data loading is completed")
                     return
                 
-                elif not self.url:
+                elif not url:
                         raise FileNotFoundError(f"File not found and no URL provided: {path}")
                         
-            if self.url:
-                if not self.file_name:
+            if url:
+                if not file_name:
                     raise ValueError(
                         "File path must be provided when downloading data"
                     )
                     
-                dataset_dir = Base_dir / "dataset"
+                dataset_dir = Base_dir / "dataset"/ directory
                 dataset_dir.mkdir(parents=True, exist_ok=True)
-                file_download_path = dataset_dir / self.file_name
+                file_download_path = dataset_dir / file_name
                 
                 async with httpx.AsyncClient(timeout=30.0) as client:
-                    response = await client.get(self.url)
+                    response = await client.get(url)
                     response.raise_for_status()
                     
                     logger.info("File is received")
@@ -61,7 +81,19 @@ class DataExtractor:
                         
                     logger.info("File is created")
                     
-                self.data = self.read_file(file_download_path)
+                data = self.read_file(file_download_path)
+                
+                if directory == "restaurants":
+                    self.restaurants_data = data
+                elif directory == "food_recipes":
+                    self.food_recipe_data = data
+                elif directory == "user_reviews":
+                    self.user_reviews = data
+                elif directory == "synthetic_recipe_images":
+                    self.synthetic_recipe_images = data
+                else:
+                    raise RuntimeError(f"{directory} is not a supported dataset directory")
+                
                 logger.info("Data loading is completed")
                 return
       
@@ -73,8 +105,26 @@ class DataExtractor:
             logger.exception("Error in load_dataset")
             raise
         
-    def  read_file(self, path):
-    
+    def  read_file(self, path:Path):
+        
+        if path.name.endswith(".zip"):
+            
+            extract_dir = path.parent / path.stem
+            extract_dir.mkdir(parents=True, exist_ok=True)
+            
+            with zipfile.ZipFile(path, "r") as zip_file:
+                zip_file.extractall(extract_dir)
+                
+            logger.info(f"ZIP file extracted to: {extract_dir}")
+            return extract_dir
+        
+        
+        if path.name.endswith(".rar"):
+            raise NotImplementedError(
+                "RAR files are not currently supported"
+            )
+
+        
         with open(path, "r", encoding="utf-8") as file:
             data = file.read()
             if not data:
@@ -87,10 +137,10 @@ class DataExtractor:
         
         try:
             
-            if not self.data:
+            if not self.restaurants_data:
                 raise ValueError("Restaurant data is missing")
             
-            formatted_data = self.data.split("\n\n")
+            formatted_data = self.restaurants_data.split("\n\n")
             formatted_data = formatted_data[1:]
             
             logger.info("Restaurant data is formatted")        
@@ -178,4 +228,8 @@ class DataExtractor:
         except Exception:
             logger.exception("Error in get_restaurants_data")
             raise
+        
+        
+        
+    async def 
   
