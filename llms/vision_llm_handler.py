@@ -35,3 +35,25 @@ class VisionLLMHandler:
             
         except Exception:
             logger.exception("Error in vision model")
+            
+    
+    async def get_vision_response(self, img_data):
+        
+        try:
+            
+            if not img_data:
+                raise ValueError("image data is missing")
+            
+            
+        
+        except ValueError:
+            logger.exception("Value error in get_vision_response")
+            raise
+            
+        except Exception:
+            logger.exception("Error in get_vision_response")
+            raise
+        
+        
+    
+    
