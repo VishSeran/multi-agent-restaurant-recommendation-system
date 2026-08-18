@@ -14,44 +14,48 @@ class DataExtractor:
     
     def __init__(self, url: str | None, file_path:str | None, file_name: str | None):
         
-        self.url = url
         llm_handler = LLMHandler()
         self.llm = llm_handler.get_llm()
-        self.file_path = file_path     
-        self.file_name = file_name
-        self.data = None          
-
-    async def load_dataset(self):
+        self.restaurants_data = None          
+        self.food_recipe_data = None
+        self.user_reviews = None
+        self.synthetic_recipes = None
+        
+    async def load_dataset(self, 
+                           file_path:str | None,
+                           file_name:str |None ,
+                           url:str| None, 
+                           directory:str):
         
         try:
             
-            if not self.url and not self.file_path:
+            if not url and not file_path:
                 raise ValueError("Error in data loading, At leaset URL or File Path must be provided!!!")
             
-            if self.file_path:
+            if file_path:
                 
-                path = Path(self.file_path).resolve()
+                path = Path(file_path).resolve()
                 if path.exists():
                     data = self.read_file(path)
-                    self.data = data
+                    self.restaurants_data = data
                     logger.info("Data loading is completed")
                     return
                 
-                elif not self.url:
+                elif not url:
                         raise FileNotFoundError(f"File not found and no URL provided: {path}")
                         
-            if self.url:
-                if not self.file_name:
+            if url:
+                if not file_name:
                     raise ValueError(
                         "File path must be provided when downloading data"
                     )
                     
-                dataset_dir = Base_dir / "dataset"
+                dataset_dir = Base_dir / "dataset"/ directory
                 dataset_dir.mkdir(parents=True, exist_ok=True)
-                file_download_path = dataset_dir / self.file_name
+                file_download_path = dataset_dir / file_name
                 
                 async with httpx.AsyncClient(timeout=30.0) as client:
-                    response = await client.get(self.url)
+                    response = await client.get(url)
                     response.raise_for_status()
                     
                     logger.info("File is received")
@@ -61,7 +65,7 @@ class DataExtractor:
                         
                     logger.info("File is created")
                     
-                self.data = self.read_file(file_download_path)
+                self.restaurants_data = self.read_file(file_download_path)
                 logger.info("Data loading is completed")
                 return
       
@@ -87,10 +91,10 @@ class DataExtractor:
         
         try:
             
-            if not self.data:
+            if not self.restaurants_data:
                 raise ValueError("Restaurant data is missing")
             
-            formatted_data = self.data.split("\n\n")
+            formatted_data = self.restaurants_data.split("\n\n")
             formatted_data = formatted_data[1:]
             
             logger.info("Restaurant data is formatted")        
@@ -178,4 +182,8 @@ class DataExtractor:
         except Exception:
             logger.exception("Error in get_restaurants_data")
             raise
+        
+        
+        
+    async 
   
