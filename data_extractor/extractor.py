@@ -5,7 +5,7 @@ import zipfile
 
 import httpx
 
-from agents.llm_handler import LLMHandler
+from llms.llm_handler import LLMHandler
 from configurations.configs import RESTAURANT_DATA_SYS_PROMPT, Base_dir
 from configurations.logger import get_logger
 from schema.restaurant import Restaurant
