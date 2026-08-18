@@ -1,10 +1,11 @@
 import os
+
+from PIL import Image
 import dotenv
 from langchain_groq import ChatGroq
 
-from configurations.configs import VISION_MODEL
+from configurations.configs import SYS_CAP_PROMPT, VISION_MODEL
 from configurations.logger import get_logger
-
 
 logger = get_logger("vision-llm")
 dotenv.load_dotenv()
@@ -37,14 +38,41 @@ class VisionLLMHandler:
             logger.exception("Error in vision model")
             
     
-    async def get_vision_response(self, img_data):
+    def img_to_data_url(self, img_path):
         
         try:
             
-            if not img_data:
+            if not img_path:
+                raise ValueError("Image path is missing")
+            
+            
+        
+        except Exception:
+            logger.exception("Error in img to data url")
+            raise    
+    
+            
+    
+    async def get_vision_response(self, img_path):
+        
+        try:
+            
+            if not img_path:
                 raise ValueError("image data is missing")
             
             
+            response = await self.vision_model.ainvoke({
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": SYS_CAP_PROMPT
+                    },
+                    {
+                        "role": "user",
+                        "content": img_path
+                    }
+                ]
+            })
         
         except ValueError:
             logger.exception("Value error in get_vision_response")
