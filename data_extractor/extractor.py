@@ -8,6 +8,7 @@ import httpx
 from llms.llm_handler import LLMHandler
 from configurations.configs import RESTAURANT_DATA_SYS_PROMPT, Base_dir
 from configurations.logger import get_logger
+from llms.vision_llm_handler import VisionLLMHandler
 from schema.restaurant import Restaurant
 
 logger = get_logger('extractor')
@@ -17,6 +18,11 @@ class DataExtractor:
     def __init__(self):
         
         llm_handler = LLMHandler()
+        logger.info("LLM handler connected to data extractor")
+        
+        vision_handler = VisionLLMHandler()
+        logger.info("Vision handler connected to data extractor")
+        
         self.llm = llm_handler.get_llm()
         self.restaurants_data = None          
         self.food_recipe_data = None
@@ -64,6 +70,11 @@ class DataExtractor:
                 if not file_name:
                     raise ValueError(
                         "File path must be provided when downloading data"
+                    )
+                    
+                if not directory:
+                    raise ValueError(
+                        "Directory must be provided when downloading data"
                     )
                     
                 dataset_dir = Base_dir / "dataset"/ directory
@@ -231,5 +242,17 @@ class DataExtractor:
         
         
         
-    async def 
+    async def combine_food_recipe_data_with_image_description(self):
+        
+        try:
+            
+            for item in self.synthetic_recipe_images.iterdir():
+                
+                if item.is_file():
+                    
+            
+        
+        except Exception:
+            logger.exception("Error in combine_food_recipe_data_with_image_description")
+            raise
   
