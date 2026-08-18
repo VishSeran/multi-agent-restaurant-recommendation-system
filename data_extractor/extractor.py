@@ -24,6 +24,7 @@ class DataExtractor:
         logger.info("Vision handler connected to data extractor")
         
         self.llm = llm_handler.get_llm()
+        self.vision = vision_handler.vision_model()
         self.restaurants_data = None          
         self.food_recipe_data = None
         self.user_reviews = None
@@ -249,6 +250,7 @@ class DataExtractor:
             for item in self.synthetic_recipe_images.iterdir():
                 
                 if item.is_file():
+                    img_data_url = visi
                     
             
         
