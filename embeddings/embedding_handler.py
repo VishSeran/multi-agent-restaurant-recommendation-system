@@ -1,5 +1,7 @@
-
+import tor
 from langchain_huggingface import HuggingFaceEmbeddings
+from transformers import CLIPModel, CLIPProcessor
+
 from configurations.logger import get_logger
 
 from configurations.configs import TEXT_EMBEDDING_MODEL,IMAGE_EMBEDDING_MODEL
@@ -21,9 +23,16 @@ class EmbeddingHandler:
                 raise ValueError("image embedding model is missing")
         
             self.text_embedding_model = HuggingFaceEmbeddings(
-                model_name = text_embed_model 
+                model_name = text_embed_model,
+                model_kwargs = {
+                    "device": device
+                },
+                encode_kwargs = {
+                    "normalize_embeddings": True
+                }
             )
-            self.image_embedding_model = None
+            
+            self.model_kwargs = 
         
         except ValueError:
             logger.exception("Value error in embedding handler init")
