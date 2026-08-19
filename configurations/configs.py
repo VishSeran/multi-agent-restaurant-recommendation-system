@@ -7,6 +7,8 @@ logger = get_logger("configs")
 
 GROQ_MODEL = "llama-3.1-8b-instant"
 VISION_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
+TEXT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+IMAGE_EMBEDDING_MODEL = "openai/clip-vit-base-patch32"
 
 Base_dir = Path.cwd().resolve()
 
