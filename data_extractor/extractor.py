@@ -1,4 +1,5 @@
 import json
+import ast
 from pathlib import Path
 from typing import Literal
 import zipfile
@@ -249,7 +250,7 @@ class DataExtractor:
             food_recipes_list = json.loads(self.food_recipe_data)
             logger.info("Food recipe list is imported")
             
-            for item in self.synthetic_recipe_images.iterdir():
+            for i,item in enumerate(self.synthetic_recipe_images.iterdir()):
                 
                 if item.is_file():
                     img_data_url = self.vision_handler.img_to_data_url(item)
@@ -258,17 +259,47 @@ class DataExtractor:
                     img_caption = await self.vision_handler.get_vision_response(img_data_url)
                     logger.info("Image caption has fetched")
                     
-                    restaurant_summary[]
+                    recipe_item = food_recipes_list[i]
+                    recipe_item["image_description"] = img_caption
                     
+                    logger.info("Recipe is updated with image description")
                     
-                    
-                    
-                    
-                    
-                    
+                logger.info("Food recipe list update is completed")
+                
+            filename = 'augmented_food_recipe.json'
+            data_directory = Base_dir/ "dataset" / "food_recipes"
+            data_directory.mkdir(parents=True, exist_ok=True)
             
-        
+            filepath = data_directory / filename
+            
+            with open(filepath, "w", encoding="utf-8") as file:
+                json.dump(food_recipes_list, file, indent=4)
+                
+            logger.info(f"{filename} is saved in {filepath} successfully")
+            
         except Exception:
             logger.exception("Error in combine_food_recipe_data_with_image_description")
             raise
   
+  
+    async def summarize_user_reviews(self):
+        
+        try:
+            
+            user_reviews_list = json.loads(self.user_reviews)
+            logger.info("user reviews converted to python list")
+            
+            for idx, review in enumerate(user_reviews_list):
+                
+                title = review['title']
+                text = review['text']
+                
+                images = ast.literal_eval(review['images'])
+                
+                for image in images:
+                    img_data_url = self.vision_handler.img_to_data_url()
+                
+            
+        except Exception:
+            logger.exception("Error in summarize user reviews")
+            raise

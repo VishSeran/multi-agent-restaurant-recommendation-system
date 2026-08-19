@@ -1,12 +1,13 @@
 import os
 from io import BytesIO
 import base64
+import httpx
 
 from PIL import Image
 import dotenv
 from langchain_groq import ChatGroq
 
-from configurations.configs import SYS_CAP_PROMPT, VISION_MODEL, USER_CAP_PROMPT
+from configurations.configs import SYS_CAP_PROMPT, VISION_MODEL, USER_CAP_PROMPT, is_url
 from configurations.logger import get_logger
 from schema.image_caption import ImageCaptionSchema
 
@@ -43,22 +44,36 @@ class VisionLLMHandler:
             logger.exception("Error in vision model")
             
     
-    def img_to_data_url(self, img_path):
+    async def img_to_data_url(self, img_path):
         
         try:
             
             if not img_path:
                 raise ValueError("Image path is missing")
             
-            buffer = BytesIO()
-            img = Image.open(img_path).convert("RGB")
-            img.save(buffer,"JPEG")
+
+            if is_url(img_path):
+                
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    
+                    response = await client.get(img_path)
+                    response.raise_for_status()
+                    
+                img_bytes = response.content
+                content_type = response.headers.get("content-type", "image/jpeg")
+                encoded_data = base64.b64encode(img_bytes).decode(encoding="utf-8")
+   
+            else:
+                buffer = BytesIO()
+                img = Image.open(img_path).convert("RGB")
+                img.save(buffer,"JPEG")
+                
+                logger.info("image saved successfully in the buffer")
+                
+                content_type = "image/jpeg"
+                encoded_data = base64.b64encode(buffer.getvalue()).decode(encoding="utf-8")
             
-            logger.info("image saved successfully in the buffer")
-            
-            encode_data = base64.b64encode(buffer.getvalue()).decode(encoding="utf-8")
-            
-            return f"data:image/jpeg;base64,{encode_data}" 
+            return f"data:{content_type};base64,{encoded_data}" 
 
         except ValueError:
             logger.exception("Value error in get_vision_response")

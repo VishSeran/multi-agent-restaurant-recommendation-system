@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 from pathlib import Path
 
 from configurations.logger import get_logger
@@ -8,6 +9,11 @@ GROQ_MODEL = "llama-3.1-8b-instant"
 VISION_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
 
 Base_dir = Path.cwd().resolve()
+
+def is_url(path:str) -> bool:
+    
+    parsed = urlparse(path)
+    return parsed.scheme in ("http", "https")
 
 EXAMPLE_RES_OUTPUT = """
     {{
