@@ -270,7 +270,10 @@ class DataExtractor:
                     )
                     
                     if recipe_item is None:
-                        
+                        logger.warning(
+                            f"No recipe found for image {item.name} with ID {recipe_id}"
+                        )
+                        continue
                     
                     recipe_item["image_description"] = img_caption
                     
