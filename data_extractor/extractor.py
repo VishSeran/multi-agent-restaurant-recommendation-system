@@ -296,8 +296,13 @@ class DataExtractor:
                 
                 images = ast.literal_eval(review['images'])
                 
+                image_data = []
                 for image in images:
-                    img_data_url = self.vision_handler.img_to_data_url()
+                    img_data_url = await self.vision_handler.img_to_data_url(image)
+                    image_data.append(img_data_url)
+                    
+                
+                
                 
             
         except Exception:
