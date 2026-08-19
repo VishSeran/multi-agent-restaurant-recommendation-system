@@ -280,3 +280,11 @@ class DataExtractor:
             logger.exception("Error in combine_food_recipe_data_with_image_description")
             raise
   
+  
+    async def summarize_user_reviews(self):
+        
+        try:
+            
+        except Exception:
+            logger.exception("Error in summarize user reviews")
+            raise
