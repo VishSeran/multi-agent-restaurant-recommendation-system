@@ -38,11 +38,12 @@ class VisionLLMHandler:
             logger.info("Vision model is initialized")
             
         except ValueError:
-            logger.exception("Value Error in vision model")    
+            logger.exception("Value Error in vision model")   
+            raise 
             
         except Exception:
             logger.exception("Error in vision model")
-            
+            raise
     
     async def img_to_data_url(self, img_path):
         
