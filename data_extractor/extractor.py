@@ -1,4 +1,5 @@
 import json
+import ast
 from pathlib import Path
 from typing import Literal
 import zipfile
@@ -284,6 +285,20 @@ class DataExtractor:
     async def summarize_user_reviews(self):
         
         try:
+            
+            user_reviews_list = json.loads(self.user_reviews)
+            logger.info("user reviews converted to python list")
+            
+            for idx, review in enumerate(user_reviews_list):
+                
+                title = review['title']
+                text = review['text']
+                
+                images = ast.literal_eval(review['images'])
+                
+                for image in images:
+                    img_data_url = self.vision_handler.img_to_data_url()
+                
             
         except Exception:
             logger.exception("Error in summarize user reviews")

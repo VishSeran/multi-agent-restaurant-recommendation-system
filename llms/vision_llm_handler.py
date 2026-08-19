@@ -50,6 +50,8 @@ class VisionLLMHandler:
             if not img_path:
                 raise ValueError("Image path is missing")
             
+            if 
+            
             buffer = BytesIO()
             img = Image.open(img_path).convert("RGB")
             img.save(buffer,"JPEG")
