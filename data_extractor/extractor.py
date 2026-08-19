@@ -250,16 +250,28 @@ class DataExtractor:
             food_recipes_list = json.loads(self.food_recipe_data)
             logger.info("Food recipe list is imported")
             
-            for i,item in enumerate(self.synthetic_recipe_images.iterdir()):
+            for item in self.synthetic_recipe_images.iterdir():
                 
                 if item.is_file():
-                    img_data_url = self.vision_handler.img_to_data_url(item)
+                    img_data_url = await self.vision_handler.img_to_data_url(item)
                     logger.info(f"{item}'s data url has proccessed")
                     
                     img_caption = await self.vision_handler.get_vision_response(img_data_url)
                     logger.info("Image caption has fetched")
                     
-                    recipe_item = food_recipes_list[i]
+                    recipe_name = item.stem
+                    recipe_id = int(recipe_name.split('e')[-1])
+                    
+                    recipe_item = next(
+                       ( recipe 
+                        for recipe in food_recipes_list
+                        if recipe['id'] == recipe_id),
+                       None
+                    )
+                    
+                    if recipe_item is None:
+                        
+                    
                     recipe_item["image_description"] = img_caption
                     
                     logger.info("Recipe is updated with image description")
@@ -301,19 +313,16 @@ class DataExtractor:
                     review["image_captions"] = []
                     continue
                 
-                elif images:
-                    for image in images:
-                        
-                        
-                        img_data_url = await self.vision_handler.img_to_data_url(image)
-                        image_data.append(img_data_url)
-                        
-                    
-                    response = await self.vision_handler.get_user_review_response(
-                        title, text, image_data
-                    )
-                
-                    review['image_captions'] = response
+                for image in images:
+
+                    img_data_url = await self.vision_handler.img_to_data_url(image)
+                    image_data.append(img_data_url)
+
+                response = await self.vision_handler.get_user_review_response(
+                    title, text, image_data
+                )
+            
+                review['image_captions'] = response
             
             filename = 'augmented_user_review.json'
             data_directory = Base_dir / "dataset" / "user_reviews"
