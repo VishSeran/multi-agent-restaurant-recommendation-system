@@ -264,16 +264,18 @@ class DataExtractor:
                     logger.info("Recipe is updated with image description")
                     
                 logger.info("Food recipe list update is completed")
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
+                
+            filename = 'augmented_food_recipe.json'
+            data_directory = Base_dir/ "dataset" / "food_recipes"
+            data_directory.mkdir(parents=True, exist_ok=True)
             
-        
+            filepath = data_directory / filename
+            
+            with open(filepath, "w", encoding="utf-8") as file:
+                json.dump(food_recipes_list, file, indent=4)
+                
+            logger.info(f"{filename} is saved in {filepath} successfully")
+            
         except Exception:
             logger.exception("Error in combine_food_recipe_data_with_image_description")
             raise
