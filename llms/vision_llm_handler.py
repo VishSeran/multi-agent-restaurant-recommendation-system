@@ -119,7 +119,7 @@ class VisionLLMHandler:
             })
             
             logger.info("Response has fetched")
-            return response
+            return response.image_description
         
         except ValueError:
             logger.exception("Value error in get_vision_response")
@@ -186,7 +186,8 @@ class VisionLLMHandler:
                 ]
             })
             
-            return response
+            logger.info("Response has fetched")
+            return response.image_description
             
         
         except ValueError:

@@ -302,7 +302,11 @@ class DataExtractor:
                     image_data.append(img_data_url)
                     
                 
+                response = await self.vision_handler.get_user_review_response(
+                    title, text, image_data
+                )
                 
+                review['image_captions'] = response
                 
             
         except Exception:
