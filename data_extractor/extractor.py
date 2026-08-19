@@ -249,7 +249,7 @@ class DataExtractor:
             food_recipes_list = json.loads(self.food_recipe_data)
             logger.info("Food recipe list is imported")
             
-            for item in self.synthetic_recipe_images.iterdir():
+            for i,item in enumerate(self.synthetic_recipe_images.iterdir()):
                 
                 if item.is_file():
                     img_data_url = self.vision_handler.img_to_data_url(item)
@@ -258,7 +258,13 @@ class DataExtractor:
                     img_caption = await self.vision_handler.get_vision_response(img_data_url)
                     logger.info("Image caption has fetched")
                     
-                    restaurant_summary[]
+                    recipe_item = food_recipes_list[i]
+                    recipe_item["image_description"] = img_caption
+                    
+                    logger.info("Recipe is updated with image description")
+                    
+                logger.info("Food recipe list update is completed")
+                    
                     
                     
                     
