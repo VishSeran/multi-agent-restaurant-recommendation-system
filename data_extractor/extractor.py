@@ -295,18 +295,34 @@ class DataExtractor:
                 text = review['text']
                 
                 images = ast.literal_eval(review['images'])
-                
                 image_data = []
-                for image in images:
-                    img_data_url = await self.vision_handler.img_to_data_url(image)
-                    image_data.append(img_data_url)
+                
+                if not images:
+                    review["image_captions"] = []
+                    continue
+                
+                elif images:
+                    for image in images:
+                        
+                        
+                        img_data_url = await self.vision_handler.img_to_data_url(image)
+                        image_data.append(img_data_url)
+                        
                     
+                    response = await self.vision_handler.get_user_review_response(
+                        title, text, image_data
+                    )
                 
-                response = await self.vision_handler.get_user_review_response(
-                    title, text, image_data
-                )
-                
-                review['image_captions'] = response
+                    review['image_captions'] = response
+            
+            filename = 'augmented_user_review.json'
+            data_directory = Base_dir / "dataset" / "user_reviews"
+            data_directory.mkdir(parents=True, exist_ok=True)
+            
+            filepath = data_directory / filename
+            
+            with open(filepath, "w", encoding="utf-8") as file:
+                json.dump(user_reviews_list, file, indent=4)
                 
             
         except Exception:
