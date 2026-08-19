@@ -222,6 +222,7 @@ class DataExtractor:
                 )
                 return self.read_file(file_path)
             
+            
             for i,restaurant_data in enumerate(formatted_data):
                 
                 logger.info(f"processing restaurant {i+1}")
@@ -240,9 +241,8 @@ class DataExtractor:
         except Exception:
             logger.exception("Error in get_restaurants_data")
             raise
-        
-        
-        
+
+     
     async def combine_food_recipe_data_with_image_description(self):
         
         try:
@@ -335,8 +335,10 @@ class DataExtractor:
             
             with open(filepath, "w", encoding="utf-8") as file:
                 json.dump(user_reviews_list, file, indent=4)
-                
             
+            logger.info("User reviews list is updated")
+            return user_reviews_list
+        
         except Exception:
             logger.exception("Error in summarize user reviews")
             raise
