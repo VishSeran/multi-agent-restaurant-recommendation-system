@@ -7,7 +7,7 @@ from PIL import Image
 import dotenv
 from langchain_groq import ChatGroq
 
-from configurations.configs import SYS_CAP_PROMPT, VISION_MODEL, USER_CAP_PROMPT, is_url
+from configurations.configs import SYS_CAP_PROMPT, USER_REVIEWS_SYSTEM_PROMPT, VISION_MODEL, USER_CAP_PROMPT, is_url
 from configurations.logger import get_logger
 from schema.image_caption import ImageCaptionSchema
 
@@ -119,7 +119,7 @@ class VisionLLMHandler:
             })
             
             logger.info("Response has fetched")
-            return response
+            return response.image_description
         
         except ValueError:
             logger.exception("Value error in get_vision_response")
@@ -127,6 +127,74 @@ class VisionLLMHandler:
             
         except Exception:
             logger.exception("Error in get_vision_response")
+            raise
+        
+    
+    async def get_user_review_response(self, title, text, image_data):
+        
+        try:
+            
+            if not title:
+                raise ValueError("title is missing")
+            
+            if not text:
+                raise ValueError("text is missing")
+            
+            if not image_data:
+                raise ValueError("image_data is missing")
+            
+            content = [
+                {
+                    "type": "text",
+                    "text": f"""
+                            Review title:
+                            {title}
+
+                            Review:
+                            {text}
+
+                            Based on the provided images and the review, provide a concise
+                            description of what is shown in the images.
+
+                            Do not simply repeat the review. Focus primarily on what can be
+                            observed in the images while using the review as context.
+                            """
+                }
+            ]
+            
+            for image in image_data:
+                content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image
+                        }
+                    }    
+                )
+                
+            response = await self.vision_structured_model.ainvoke({
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": USER_REVIEWS_SYSTEM_PROMPT
+                        
+                    },
+                    {
+                        "role": "user",
+                        "content": content
+                    }
+                ]
+            })
+            
+            logger.info("Response has fetched")
+            return response.image_description
+            
+        
+        except ValueError:
+            logger.exception("Value error in get_user_review_response")
+            raise
+        except Exception:
+            logger.exception("Error in get_user_review_response")
             raise
         
         
