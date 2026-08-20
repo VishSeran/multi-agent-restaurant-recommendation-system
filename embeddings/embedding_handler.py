@@ -1,4 +1,5 @@
 import torch
+from pathlib import Path
 from langchain_huggingface import HuggingFaceEmbeddings
 from transformers import CLIPModel, CLIPProcessor
 
@@ -52,6 +53,8 @@ class EmbeddingHandler:
                 cache_dir=CACHE_DIR
             ) 
             
+            self.image_embedding_model.eval()
+            
             logger.info("Image embedding model is initiated")
         
         except ValueError:
@@ -63,12 +66,20 @@ class EmbeddingHandler:
             raise
         
         
-    def get_image_embeddings(self, image_path):
+    def get_image_embeddings(self, image_path: str | Path | list [str | Path], 
+                            batch_size = 16):
         
         try:
             
             if not image_path:
                 raise ValueError("Image path is missing")
+            
+            vectors = []
+            
+            
+            
+            with torch.no_grad():
+                for i in range(0, len())
             
         except ValueError:
             logger.exception("Value error in get_image_embeddings")
