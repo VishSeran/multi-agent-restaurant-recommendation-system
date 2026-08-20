@@ -51,6 +51,8 @@ class EmbeddingHandler:
                 img_embed_model,
                 cache_dir=CACHE_DIR
             ) 
+            
+            logger.info("Image embedding model is initiated")
         
         except ValueError:
             logger.exception("Value error in embedding handler init")
@@ -59,4 +61,22 @@ class EmbeddingHandler:
         except Exception:
             logger.exception("Error in embedding handler init")
             raise
+        
+        
+    def get_image_embeddings(self, image_path):
+        
+        try:
+            
+            if not image_path:
+                raise ValueError("Image path is missing")
+            
+        except ValueError:
+            logger.exception("Value error in get_image_embeddings")
+            raise
+        
+        except Exception:
+            logger.exception("Error in get_image_embeddings")
+            raise
+        
+        
     
