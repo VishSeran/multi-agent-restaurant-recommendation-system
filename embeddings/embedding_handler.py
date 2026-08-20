@@ -1,20 +1,29 @@
-import tor
+import torch
+from pathlib import Path
 from langchain_huggingface import HuggingFaceEmbeddings
 from transformers import CLIPModel, CLIPProcessor
 
 from configurations.logger import get_logger
 
-from configurations.configs import TEXT_EMBEDDING_MODEL,IMAGE_EMBEDDING_MODEL
+from configurations.configs import TEXT_EMBEDDING_MODEL,IMAGE_EMBEDDING_MODEL, Base_dir
 
 logger = get_logger("embedding-handler")
+
+
+CACHE_DIR = Base_dir / "cache"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
 
 class EmbeddingHandler:
     
     def __init__(self, 
-                 text_embed_model = TEXT_EMBEDDING_MODEL, 
-                 img_embed_model = IMAGE_EMBEDDING_MODEL ):
+                text_embed_model = TEXT_EMBEDDING_MODEL, 
+                img_embed_model = IMAGE_EMBEDDING_MODEL ):
         
         try:
+            
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            logger.info(f"Device is initiated: {device}")
             
             if not text_embed_model:
                 raise ValueError("text embedding model is missing")
@@ -32,7 +41,21 @@ class EmbeddingHandler:
                 }
             )
             
-            self.model_kwargs = 
+            logger.info("text embedding model is initiated")
+            
+            self.image_embedding_model = CLIPModel.from_pretrained(
+                img_embed_model,
+                cache_dir=CACHE_DIR
+            ).to(device)
+            
+            self.image_processor = CLIPProcessor.from_pretrained(
+                img_embed_model,
+                cache_dir=CACHE_DIR
+            ) 
+            
+            self.image_embedding_model.eval()
+            
+            logger.info("Image embedding model is initiated")
         
         except ValueError:
             logger.exception("Value error in embedding handler init")
@@ -41,4 +64,30 @@ class EmbeddingHandler:
         except Exception:
             logger.exception("Error in embedding handler init")
             raise
+        
+        
+    def get_image_embeddings(self, image_path: str | Path | list [str | Path], 
+                            batch_size = 16):
+        
+        try:
+            
+            if not image_path:
+                raise ValueError("Image path is missing")
+            
+            vectors = []
+            
+            
+            
+            with torch.no_grad():
+                for i in range(0, len())
+            
+        except ValueError:
+            logger.exception("Value error in get_image_embeddings")
+            raise
+        
+        except Exception:
+            logger.exception("Error in get_image_embeddings")
+            raise
+        
+        
     
