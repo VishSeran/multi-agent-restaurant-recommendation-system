@@ -10,7 +10,7 @@ VISION_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
 TEXT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 IMAGE_EMBEDDING_MODEL = "openai/clip-vit-base-patch32"
 
-
+DB_DIR = str((Path.cwd() / "chroma_multimodal").resolve())
 Base_dir = Path.cwd().resolve()
 
 def is_url(path:str) -> bool:

@@ -1,4 +1,5 @@
 from langchain_chroma.vectorstores import Chroma
+from configurations.configs import DB_DIR
 from configurations.logger import get_logger
 from documents_handler.image_recipe_data_handler import ImageRecipeHandler
 from embeddings.embedding_handler import embedding_handler
@@ -18,7 +19,13 @@ class ImageVectorDB:
             if not recipe_data:
                 raise ValueError("Recipe data is missing")
 
-            self.vector_db = None
+            self.vector_db = Chroma(
+                        collection_name="food_images",
+                        persist_directory= DB_DIR,
+                    ) 
+            
+            logger.info("food_images chroma db created")
+                   
             self.image_paths = image_paths
             self.recipe_data = recipe_data
             self.image_handler = ImageRecipeHandler()
@@ -31,7 +38,7 @@ class ImageVectorDB:
             logger.exception("Error in image vector db")
             raise
     
-    def init_db(self):
+    def add_image_vectors(self):
         
         
         try:
@@ -43,6 +50,17 @@ class ImageVectorDB:
             
             image_embeddings = image_embeddings.tolist()
             
+            if self.vector_db is None:
+                raise RuntimeError("Please create image chroma db first")
+            
+            self.vector_db._collection.upsert(
+                ids=[doc.metadata['doc_id'] for doc in image_docs_list],
+                embeddings=image_embeddings,
+                metadatas=[doc.metadata for doc in image_docs_list],
+                documents=[doc.page_content for doc in image_docs_list]
+            )
+            
+            logger.info("Food image db ready!!!")
             
             
             
