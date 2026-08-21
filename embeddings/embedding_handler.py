@@ -178,4 +178,4 @@ class EmbeddingHandler:
             logger.exception("Error in get text embeddings")
             raise
         
-    
+embedding_handler = EmbeddingHandler()
