@@ -149,7 +149,13 @@ class EmbeddingHandler:
             logger.exception("Error in get_image_embeddings")
             raise
     
-    
-    def get_text_embeddings(self,)
+    @torch.inference_mode()
+    def get_text_embeddings(self,docs):
+        
+        try:
+            
+        except Exception:
+            logger.exception("Error in get text embeddings")
+            raise
         
     
