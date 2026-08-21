@@ -291,6 +291,7 @@ class DataExtractor:
                 json.dump(food_recipes_list, file, indent=4)
                 
             logger.info(f"{filename} is saved in {filepath} successfully")
+            return food_recipes_list
             
         except Exception:
             logger.exception("Error in combine_food_recipe_data_with_image_description")
