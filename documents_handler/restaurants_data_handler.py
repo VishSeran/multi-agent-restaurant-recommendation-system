@@ -40,7 +40,9 @@ class RestaurantsDataHandler:
                         }
                     )
                 )
-                
+            
+            logger.info("restaurant data successfully documentarized")
+            return restaurants_docs 
             
         except Exception:
             logger.exception("Error in restaurants data handler")
