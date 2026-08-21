@@ -63,8 +63,6 @@ class ImageVectorDB:
             logger.info("Food image db ready!!!")
             
             
-            
-            
         except ValueError:
             logger.exception("Value error in init db")
             raise
