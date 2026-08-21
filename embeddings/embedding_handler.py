@@ -148,6 +148,8 @@ class EmbeddingHandler:
         except Exception:
             logger.exception("Error in get_image_embeddings")
             raise
-        
+    
+    
+    def get_text_embeddings(self,)
         
     
