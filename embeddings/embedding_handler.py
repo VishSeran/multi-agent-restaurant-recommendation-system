@@ -76,7 +76,7 @@ class EmbeddingHandler:
         
     
     @torch.inference_mode()  
-    def get_image_embeddings(self, image_path: Path | list[Path],
+    def get_image_embeddings(self, image_path: list[Path],
                             batch_size = 16):
         
         try:
@@ -84,67 +84,56 @@ class EmbeddingHandler:
             if not image_path:
                 raise ValueError("Image path is missing")
             
+            paths = [
+                    path 
+                    for path in image_path
+                    if path.is_file()
+                    and path.suffix.lower() in self.IMAGE_EXTENSIONS
+                ]
+            
+            if not paths:
+                logger.warning("No valid image files found")
+                return np.empty(
+                    (0, self.image_embedding_model.config.projection_dim),
+                    dtype=np.float32
+                )
+            
             vectors = []
-            
-            
-            
-            if image_path.exists():
+     
+            for i in range(0, len(paths), batch_size):
                 
-                if image_path.is_file():
-                    images = []
-                    with Image.open(image_path) as image:
-                        image = image.convert("RGB")
-                        images.append(image)
+                images = []
+                
+                batch = paths[i : i+batch_size]
+                
+                for path in batch:
+                    with Image.open(path) as img:
+                        images.append(img.convert("RGB"))
                         
-                elif image_path.is_dir():
-                    
-                    paths = [
-                        path 
-                        for path in image_path.iterdir()
-                        if path.is_file()
-                        and path.suffix.lower() in self.IMAGE_EXTENSIONS
-                    ]
-                                
-                    
-                    for i in range(0, len(paths), batch_size):
-                        
-                        images = []
-                        
-                        batch = paths[i : i+batch_size]
-                        
-                        for path in batch:
-                            with Image.open(path) as img:
-                                images.append(img.convert("RGB"))
-                                
+    
+                inputs = self.image_processor(
+                    images=images,
+                    return_tensors = "pt"
+                )
             
-                        inputs = self.image_processor(
-                            images=images,
-                            return_tensors = "pt"
-                        )
-                    
-                        inputs = {
-                            key: value.to(self.device)
-                            for key, value in inputs.items()
-                        }
-                    
-                        features = self.image_embedding_model.get_image_features(**inputs)
-                    
-                        # L2 normalization for cosine similarity
-                        features = torch.nn.functional.normalize(
-                            features,
-                            p=2,
-                            dim=-1
-                        )
-                    
-                        vectors.append(features.cpu().numpy().astype(np.float32))
-                        logger.info("image vectors are updated")
-                    
-                else:
-                    raise RuntimeError(f"Error in file type: {image_path}")
+                inputs = {
+                    key: value.to(self.device)
+                    for key, value in inputs.items()
+                }
             
-            else:
-                raise FileNotFoundError(f"File not found in {image_path}")
+                features = self.image_embedding_model.get_image_features(**inputs)
             
+                # L2 normalization for cosine similarity
+                features = torch.nn.functional.normalize(
+                    features,
+                    p=2,
+                    dim=-1
+                )
+            
+                vectors.append(features.cpu().numpy().astype(np.float32))
+                logger.info("image vectors are updated")
+                    
+
             if not vectors:
                 return np.empty(
                     (0, self.image_embedding_model.config.projection_dim),
@@ -178,4 +167,5 @@ class EmbeddingHandler:
             logger.exception("Error in get text embeddings")
             raise
         
+
 embedding_handler = EmbeddingHandler()
