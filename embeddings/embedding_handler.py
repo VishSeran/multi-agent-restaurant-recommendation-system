@@ -24,6 +24,13 @@ class EmbeddingHandler:
         
         try:
             
+            self.IMAGE_EXTENSIONS = {
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".webp",
+                }
+            
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             logger.info(f"Device is initiated: {self.device}")
             
@@ -69,7 +76,7 @@ class EmbeddingHandler:
         
     
     @torch.inference_mode()  
-    def get_image_embeddings(self, image_path: str | Path | list [str | Path],
+    def get_image_embeddings(self, image_path: Path | list[Path],
                             batch_size = 16):
         
         try:
@@ -79,21 +86,27 @@ class EmbeddingHandler:
             
             vectors = []
             
-            paths = []
+            
             
             if image_path.exists():
                 
                 if image_path.is_file():
                     images = []
-                    image = Image.open(image_path).convert("RGB")
-                    images.append(image)
-                    
+                    with Image.open(image_path) as image:
+                        image = image.convert("RGB")
+                        images.append(image)
+                        
                 elif image_path.is_dir():
                     
-                    for path in image_path.iterdir():
-                        paths.append(path)
+                    paths = [
+                        path 
+                        for path in image_path.iterdir()
+                        if path.is_file()
+                        and path.suffix.lower() in self.IMAGE_EXTENSIONS
+                    ]
+                                
                     
-                    for i in range(0, len(paths), batch_size = 16):
+                    for i in range(0, len(paths), batch_size):
                         
                         images = []
                         
@@ -149,11 +162,18 @@ class EmbeddingHandler:
             logger.exception("Error in get_image_embeddings")
             raise
     
-    @torch.inference_mode()
-    def get_text_embeddings(self,docs):
+    def get_text_embeddings(self,text:list[str]):
         
         try:
+            if not text:
+                raise ValueError("Texts are missing")
             
+            embeddings = self.text_embedding_model.embed_documents(text)
+            return np.ndarray(
+                embeddings,
+                dtype=np.float32
+            )
+
         except Exception:
             logger.exception("Error in get text embeddings")
             raise
