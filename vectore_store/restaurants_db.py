@@ -2,7 +2,8 @@ from langchain_chroma.vectorstores import Chroma
 
 from configurations.configs import DB_DIR
 from configurations.logger import get_logger
-from embeddings import embedding_handler
+from documents_handler.restaurants_data_handler import RestaurantsDataHandler
+from embeddings.embedding_handler import embedding_handler
 
 
 logger =  get_logger("restaurant-db")
@@ -10,15 +11,19 @@ logger =  get_logger("restaurant-db")
 class RestaurantVectorDB:
     
     def __init__(self, restaurants_data):
-        
-        self.vector_store = Chroma(
-            collection_name="restaurants_data",
-            persist_directory=DB_DIR
-        )
-        logger.info("Restaurant chroma db initiated")
+
         self.restaurants_data = restaurants_data
+        self.restaurant_handler = RestaurantsDataHandler()
         
         self.embedding = embedding_handler
+        
+        self.vector_store = Chroma(
+                    collection_name="restaurants_articles",
+                    persist_directory=DB_DIR,
+                    embedding_function=self.embedding.get_text_embedding_model()
+                )
+        
+        logger.info("Restaurant chroma db initiated")
         
         
     def create_restaurant_vector_store(self):
@@ -28,10 +33,15 @@ class RestaurantVectorDB:
             if self.vector_store is None:
                 raise RuntimeError("Please initial restaurants chroma db first")
             
-            self.vector_store.from_documents(
-                documents=self.restaurants_data,
-                embedding=self.embedding.
+            restaurant_documents = self.restaurant_handler(self.restaurants_data)
+            
+            self.vector_store.add_documents(
+                documents=restaurant_documents,
+                ids=[doc.metadata['doc_id'] for doc in restaurant_documents]
             )
+            
+            logger.info("restaurants_articles chroma db created!!!")
+            
         except Exception:
             logger.exception("Error in create_restaurant_vector_store")
             raise
