@@ -1,5 +1,7 @@
+import numpy as np
 import torch
 from pathlib import Path
+from PIL import Image
 from langchain_huggingface import HuggingFaceEmbeddings
 from transformers import CLIPModel, CLIPProcessor
 
@@ -22,8 +24,8 @@ class EmbeddingHandler:
         
         try:
             
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            logger.info(f"Device is initiated: {device}")
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            logger.info(f"Device is initiated: {self.device}")
             
             if not text_embed_model:
                 raise ValueError("text embedding model is missing")
@@ -34,7 +36,7 @@ class EmbeddingHandler:
             self.text_embedding_model = HuggingFaceEmbeddings(
                 model_name = text_embed_model,
                 model_kwargs = {
-                    "device": device
+                    "device": self.device
                 },
                 encode_kwargs = {
                     "normalize_embeddings": True
@@ -46,7 +48,7 @@ class EmbeddingHandler:
             self.image_embedding_model = CLIPModel.from_pretrained(
                 img_embed_model,
                 cache_dir=CACHE_DIR
-            ).to(device)
+            ).to(self.device)
             
             self.image_processor = CLIPProcessor.from_pretrained(
                 img_embed_model,
@@ -65,8 +67,9 @@ class EmbeddingHandler:
             logger.exception("Error in embedding handler init")
             raise
         
-        
-    def get_image_embeddings(self, image_path: str | Path | list [str | Path], 
+    
+    @torch.inference_mode()  
+    def get_image_embeddings(self, image_path: str | Path | list [str | Path],
                             batch_size = 16):
         
         try:
@@ -75,11 +78,51 @@ class EmbeddingHandler:
                 raise ValueError("Image path is missing")
             
             vectors = []
+            images = []
+            paths = []
             
+            if image_path.exists():
+                
+                if image_path.is_file():
+                    image = Image.open(image_path).convert("RGB")
+                    images.append(image)
+                    
+                elif image_path.is_dir():
+                    
+                    for path in image_path.iterdir():
+                        paths.append(path)
+                    
+                    for i in range(0, len(paths), batch_size = 16):
+                        
+                        batch = paths[i : i+batch_size]
+                        
+                        for path in batch:
+                            with Image.open(path) as img:
+                                images.append(img.convert("RGB"))
+                                
             
-            
-            with torch.no_grad():
-                for i in range(0, len())
+                    inputs = self.image_processor(
+                        images=images,
+                        return_tensors = "pt"
+                    )
+                    
+                    inputs = {
+                        key: value.to(self.device)
+                        for key, value in inputs.items()
+                    }
+                    
+                    features = self.image_embedding_model.get_image_features(**inputs)
+                    
+                    # L2 normalization for cosine similarity
+                    features = torch.nn.functional.normalize(
+                        features,
+                        p=2,
+                        dim=-1
+                    )
+                    
+                    vectors.append(features.cpu().numpy().astype(np.float32))
+                    logger.info("image vectors are updated")
+                
             
         except ValueError:
             logger.exception("Value error in get_image_embeddings")
