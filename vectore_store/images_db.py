@@ -1,4 +1,4 @@
-
+from langchain_chroma.vectorstores import Chroma
 from configurations.logger import get_logger
 from documents_handler.image_recipe_data_handler import ImageRecipeHandler
 from embeddings.embedding_handler import embedding_handler
@@ -40,6 +40,10 @@ class ImageVectorDB:
             image_embeddings = embedding_handler.get_image_embeddings([
                 doc.metadata.get("image_path") for doc in image_docs_list
             ])
+            
+            image_embeddings = image_embeddings.tolist()
+            
+            
             
             
             
