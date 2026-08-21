@@ -211,7 +211,7 @@ class DataExtractor:
             total_len = len(formatted_data)
             
             filename = "structured_restaurant_data.json"
-            dataset_dir = Base_dir / "dataset"
+            dataset_dir = Base_dir / "dataset" / "restaurants"
             dataset_dir.mkdir(parents=True, exist_ok=True)
             
             file_path = dataset_dir / filename
