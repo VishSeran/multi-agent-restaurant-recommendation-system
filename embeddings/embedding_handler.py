@@ -167,5 +167,9 @@ class EmbeddingHandler:
             logger.exception("Error in get text embeddings")
             raise
         
+    def get_text_embedding_model(self):
+        
+        return self.text_embedding_model
+        
 
 embedding_handler = EmbeddingHandler()

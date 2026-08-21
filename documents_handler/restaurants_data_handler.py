@@ -12,7 +12,7 @@ class RestaurantsDataHandler:
         
         self.file_name = Base_dir / "dataset" / "restaurants" / "structured_restaurant_data.json"
         
-    def __call__(self, restaurants_data:list[dict]):
+    def __call__(self, restaurants_data:list[dict]) -> list[Document]:
         
         try:
             
