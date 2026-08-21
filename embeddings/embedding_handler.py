@@ -78,12 +78,13 @@ class EmbeddingHandler:
                 raise ValueError("Image path is missing")
             
             vectors = []
-            images = []
+            
             paths = []
             
             if image_path.exists():
                 
                 if image_path.is_file():
+                    images = []
                     image = Image.open(image_path).convert("RGB")
                     images.append(image)
                     
@@ -94,6 +95,8 @@ class EmbeddingHandler:
                     
                     for i in range(0, len(paths), batch_size = 16):
                         
+                        images = []
+                        
                         batch = paths[i : i+batch_size]
                         
                         for path in batch:
@@ -101,28 +104,42 @@ class EmbeddingHandler:
                                 images.append(img.convert("RGB"))
                                 
             
-                    inputs = self.image_processor(
-                        images=images,
-                        return_tensors = "pt"
-                    )
+                        inputs = self.image_processor(
+                            images=images,
+                            return_tensors = "pt"
+                        )
                     
-                    inputs = {
-                        key: value.to(self.device)
-                        for key, value in inputs.items()
-                    }
+                        inputs = {
+                            key: value.to(self.device)
+                            for key, value in inputs.items()
+                        }
                     
-                    features = self.image_embedding_model.get_image_features(**inputs)
+                        features = self.image_embedding_model.get_image_features(**inputs)
                     
-                    # L2 normalization for cosine similarity
-                    features = torch.nn.functional.normalize(
-                        features,
-                        p=2,
-                        dim=-1
-                    )
+                        # L2 normalization for cosine similarity
+                        features = torch.nn.functional.normalize(
+                            features,
+                            p=2,
+                            dim=-1
+                        )
                     
-                    vectors.append(features.cpu().numpy().astype(np.float32))
-                    logger.info("image vectors are updated")
-                
+                        vectors.append(features.cpu().numpy().astype(np.float32))
+                        logger.info("image vectors are updated")
+                    
+                else:
+                    raise RuntimeError(f"Error in file type: {image_path}")
+            
+            else:
+                raise FileNotFoundError(f"File not found in {image_path}")
+            
+            if not vectors:
+                return np.empty(
+                    (0, self.image_embedding_model.config.projection_dim),
+                    dtype=np.float32
+                )
+            
+            logger.info("Vectors are concatenated")   
+            return np.concatenate(vectors, axis=0)
             
         except ValueError:
             logger.exception("Value error in get_image_embeddings")
