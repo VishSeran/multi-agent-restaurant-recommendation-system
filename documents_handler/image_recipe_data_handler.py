@@ -11,7 +11,7 @@ class ImageRecipeHandler:
     def __init__(self):
         self.filename = Base_dir / "dataset" / "restaurants" / "augmented_food_recipe.json"
     
-    def __call__(self, image_path, recipe_data:list[dict]):
+    def __call__(self, image_path, recipe_data:list[dict]) -> list[Document]:
         
         try:
             

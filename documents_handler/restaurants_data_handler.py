@@ -47,3 +47,6 @@ class RestaurantsDataHandler:
         except Exception:
             logger.exception("Error in restaurants data handler")
             raise
+        
+        
+    
