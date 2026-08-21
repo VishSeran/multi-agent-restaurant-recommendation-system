@@ -37,7 +37,8 @@ class ImageRecipeHandler:
                     )
                 )
                 
-            
+            logger.info("Image and recipe data successfully documentarized")
+            return image_docs
             
             
         except Exception:
