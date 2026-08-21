@@ -38,7 +38,7 @@ class ImageVectorDB:
             logger.exception("Error in image vector db")
             raise
     
-    def add_image_vectors(self):
+    def create_food_image_vector_store(self):
         
         
         try:
