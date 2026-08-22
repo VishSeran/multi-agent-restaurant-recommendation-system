@@ -40,7 +40,7 @@ class RestaurantVectorDB:
                 ids=[doc.metadata['doc_id'] for doc in restaurant_documents]
             )
             
-            logger.info("restaurants_articles chroma db created!!!")
+            logger.info("Restaurant chroma db ready!!!")
             
         except Exception:
             logger.exception("Error in create_restaurant_vector_store")
