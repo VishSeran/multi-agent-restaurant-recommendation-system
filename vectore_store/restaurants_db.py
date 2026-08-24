@@ -45,3 +45,16 @@ class RestaurantVectorDB:
         except Exception:
             logger.exception("Error in create_restaurant_vector_store")
             raise
+        
+    
+    def search_query(query:str):
+        
+        try:
+            
+        except ValueError:
+            logger.exception("Value error in search query")
+            raise
+        
+        except Exception:
+            logger.exception("Error in search query")
+            raise
