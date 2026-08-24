@@ -23,6 +23,8 @@ class RestaurantVectorDB:
                     embedding_function=self.embedding.get_text_embedding_model()
                 )
         
+        self.restaurant_store_retriever = None
+        
         logger.info("Restaurant chroma db initiated")
         
         
@@ -42,14 +44,30 @@ class RestaurantVectorDB:
             
             logger.info("Restaurant chroma db ready!!!")
             
+            self.restaurant_store_retriever = self.vector_store.as_retriever(
+                search_type = "mmr",
+                search_kwargs = {
+                    "k": 6
+                }
+            )
+            
+            logger.info("Restaurant chroma db retriever ready!!!")
+            
         except Exception:
             logger.exception("Error in create_restaurant_vector_store")
             raise
         
     
+        
+    
     def search_query(query:str):
         
         try:
+            
+            if not query:
+                raise ValueError("query is missing")
+            
+            
             
         except ValueError:
             logger.exception("Value error in search query")
