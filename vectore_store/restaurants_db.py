@@ -1,5 +1,6 @@
 from langchain_chroma.vectorstores import Chroma
-
+from langchain_community.retrievers import BM25Retriever
+from langchain_classic.retrievers import EnsembleRetriever
 from configurations.configs import DB_DIR
 from configurations.logger import get_logger
 from documents_handler.restaurants_data_handler import RestaurantsDataHandler
@@ -24,6 +25,8 @@ class RestaurantVectorDB:
                 )
         
         self.restaurant_store_retriever = None
+        self.bm25_retriever = None
+        self.hybrid_retriever = None
         
         logger.info("Restaurant chroma db initiated")
         
@@ -53,19 +56,36 @@ class RestaurantVectorDB:
             
             logger.info("Restaurant chroma db retriever ready!!!")
             
+            self.bm25_retriever = BM25Retriever.from_documents(
+                documents=restaurant_documents
+            )
+            
+            logger.info("Restaurant chroma db bm25 retriever ready!!!")
+            
+            self.hybrid_retriever = EnsembleRetriever(
+                retrievers=[self.restaurant_store_retriever, self.bm25_retriever],
+                weights=[0.5, 0.5]
+            )
+            
+            logger.info("Restaurant chroma db Hybrid retriever initialized")
+            
+            
         except Exception:
             logger.exception("Error in create_restaurant_vector_store")
             raise
         
     
-        
-    
-    def search_query(query:str):
+    def search_query(self,query:str):
         
         try:
             
             if not query:
                 raise ValueError("query is missing")
+            
+            if self.restaurant_store_retriever is None:
+                raise RuntimeError("Error: retriever is missing")
+            
+            
             
             
             
