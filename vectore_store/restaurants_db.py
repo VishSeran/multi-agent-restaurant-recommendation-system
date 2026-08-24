@@ -75,7 +75,7 @@ class RestaurantVectorDB:
             raise
         
     
-    def search_query(self,query:str):
+    async def search_query(self,query:str):
         
         try:
             
@@ -85,7 +85,9 @@ class RestaurantVectorDB:
             if self.restaurant_store_retriever is None:
                 raise RuntimeError("Error: retriever is missing")
             
+            top_docs = await self.hybrid_retriever.ainvoke(query)
             
+            return result
             
             
             
