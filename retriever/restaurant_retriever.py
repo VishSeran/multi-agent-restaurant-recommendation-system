@@ -11,7 +11,6 @@ class RestaurantRetriever:
         
         self.text_retriever = text_retriever,
         self.image_retriever = image_retriever,
-        self.reranker = reranker
         
     def reciprocal_score(rank:int, constant:int = 60):
         return 1/ (rank+constant)
@@ -73,4 +72,24 @@ class RestaurantRetriever:
 
         except Exception:
             logger.exception("Error in fuse result")
+            raise
+        
+    
+    def reranker(self, sorted_list: list[dict]):
+        
+        try:
+            
+            text_combination = []
+            
+            for item in sorted_list['text_results']:
+                text_combination.append(item['content'])
+                
+            for item in sorted_list['image_results']:
+                text_combination.append(f"Image description: {item['content']}")
+                
+            return "\n".join(text_combination)
+            
+            
+        except Exception:
+            logger.exception("Error in reranker")
             raise
