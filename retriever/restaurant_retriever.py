@@ -1,5 +1,5 @@
 
-
+from retriever.reranker import reranker_obj
 from configurations.logger import get_logger
 
 
@@ -9,9 +9,9 @@ class RestaurantRetriever:
     
     def __init__(self, text_retriever, image_retriever, reranker):
         
-        self.text_retriever = text_retriever,
-        self.image_retriever = image_retriever,
-        self.reranker = reranker
+        self.text_retriever = text_retriever
+        self.image_retriever = image_retriever
+        self.re_ranker = reranker_obj.get_reranker()
         
     def reciprocal_score(rank:int, constant:int = 60):
         return 1/ (rank+constant)
@@ -28,7 +28,96 @@ class RestaurantRetriever:
         
         try:
             
+            fuse = {}
             
+            for item in text_results:
+                restaurant_id = item.get("doc_id","")
+                
+                if restaurant_id not in fuse:
+                
+                    fuse[restaurant_id] = {
+                        "restaurant_id": restaurant_id,
+                        "fusion_score": 0.0,
+                        "text_results": [],
+                        "image_results": []
+                    }
+                    
+                score = text_weight * self.reciprocal_score(item["rank"])
+                fuse[restaurant_id]['fusion_score'] += score
+                fuse[restaurant_id]['text_result'].append(item)
+                
+                
+            for item in image_results:
+                restaurant_id = item.get['doc_id']
+                
+                if restaurant_id not in fuse:
+                    fuse[restaurant_id] = {
+                        "restaurant_id": restaurant_id,
+                        "fusion_score": 0.0,
+                        "text_results": [],
+                        "image_results": []
+                    }    
+                    
+                score = image_weight * self.reciprocal_score(item['rank'])
+                fuse[restaurant_id]['fusion_score'] += score
+                fuse[restaurant_id]['image_results'].append(item)
+                
+            
+            sort = sorted(
+                fuse.values(),
+                key= lambda x: x['fusion_score'],
+                reverse=True
+            )
+            
+            return sort
+
         except Exception:
             logger.exception("Error in fuse result")
+            raise
+        
+    
+    def reranker(self, query:str, sorted_list: list[dict]):
+        
+        try:
+            
+            sorted_list = sorted_list[:15]
+            
+            text_combination = []
+            reranker_text = []
+            
+            for item in sorted_list['text_results']:
+                text_combination.append(item['content'])
+                
+            for item in sorted_list['image_results']:
+                text_combination.append(f"Image description: {item['content']}")
+                
+            for item in text_combination:
+                reranker_text.append([
+                    query,
+                    item
+                ])
+            
+            
+            scores = self.re_ranker.compute_score(
+                reranker_text,
+                kwargs={
+                    "normalize": True
+                }
+            )
+            
+            
+            for item, score in zip(sorted_list, scores):
+                item['rerank_score'] = float(score)
+                
+            return sorted(
+                sorted_list,
+                key= lambda x: x["rerank_score"],
+                reverse=True
+            )
+            
+            
+                
+            
+        except Exception:
+            logger.exception("Error in reranker")
             raise
