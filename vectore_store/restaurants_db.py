@@ -82,15 +82,22 @@ class RestaurantVectorDB:
             if not query:
                 raise ValueError("query is missing")
             
-            if self.restaurant_store_retriever is None:
+            if self.hybrid_retriever is None:
                 raise RuntimeError("Error: retriever is missing")
-            
+
             top_docs = await self.hybrid_retriever.ainvoke(query)
-            
+            result = []
+
+            for doc in top_docs:
+                doc_result = {}
+                doc_result['doc_id'] = doc.metadata['doc_id']
+                doc_result['content'] = doc.page_content
+                doc_result['metadata'] = doc.metadata
+                
+                result.append(doc_result)
+                
             return result
-            
-            
-            
+
         except ValueError:
             logger.exception("Value error in search query")
             raise
