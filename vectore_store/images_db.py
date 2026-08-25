@@ -70,3 +70,19 @@ class ImageVectorDB:
         except Exception:
             logger.exception("Error in init db")
             raise
+        
+        
+    def image_query_search(image_query):
+        
+        try:
+            
+            if not image_query:
+                raise ValueError("Image query is missing")
+            
+        except ValueError:
+            logger.exception("Value error in image query search")
+            raise
+        
+        except Exception:
+            logger.exception("Error in image query search")
+            raise
