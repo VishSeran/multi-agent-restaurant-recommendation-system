@@ -94,7 +94,17 @@ class ImageVectorDB:
             metas = result.get("metadatas",[[]])[0]
             dists = result.get("distances",[[]])[0]
             
-            return ids, docs, metas, dists
+            results = []
+            
+            for id, doc, meta, dist in zip(ids, docs, metas, dists):
+                results.append({
+                    "doc_id": id,
+                    "content": doc,
+                    "metadata": meta,
+                    "distance": dist
+                })
+            
+            return results
             
         except ValueError:
             logger.exception("Value error in image query search")
