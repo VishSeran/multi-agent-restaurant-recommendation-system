@@ -93,12 +93,24 @@ class RestaurantRetriever:
                 
             for item in text_combination:
                 reranker_text.append([
-                    query,item
+                    query,
+                    item
                 ])
             
             
-            scores = self.re_ranker.compute_score(reranker_text)
+            scores = self.re_ranker.compute_score(
+                reranker_text,
+                kwargs={
+                    "normalize": True
+                }
+            )
             
+            
+            for item, score in zip(sorted_list, scores):
+                item['rerank_score'] = float(score)
+            
+            
+                
             
         except Exception:
             logger.exception("Error in reranker")
