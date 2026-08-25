@@ -7,12 +7,14 @@ logger = get_logger("restaurant_retriever")
 
 class RestaurantRetriever:
     
-    def __init__(self, text_retriever, image_retriever, reranker):
+    def __init__(self, query,text_retriever, image_retriever, reranker):
         
         self.text_retriever = text_retriever
         self.image_retriever = image_retriever
+        self.query = query
         self.re_ranker = reranker_obj.get_reranker()
         self.sort = None
+        self.final_sort_list = None
         
     def reciprocal_score(self,rank:int, constant:int = 60):
         return 1/ (rank+constant)
@@ -77,7 +79,7 @@ class RestaurantRetriever:
             raise
         
     
-    def reranker(self, query:str):
+    def reranker(self):
         
         try:
             
@@ -99,7 +101,7 @@ class RestaurantRetriever:
                 combined_text = "\n".join(content)
                 
                 reranker_pairs.append([
-                    query,
+                    self.query,
                     combined_text
                 ])
             
@@ -108,11 +110,13 @@ class RestaurantRetriever:
             for item, score in zip(sorted_list, scores):
                 item['rerank_score'] = float(score)
                 
-            return sorted(
+            self.final_sort_list =  sorted(
                 sorted_list,
                 key= lambda x: x["rerank_score"],
                 reverse=True
             )
+            
+            return self.final_sort_list
            
         except Exception:
             logger.exception("Error in reranker")
