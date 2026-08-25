@@ -1,5 +1,5 @@
 
-
+from retriever.reranker import reranker_obj
 from configurations.logger import get_logger
 
 
@@ -7,10 +7,11 @@ logger = get_logger("restaurant_retriever")
 
 class RestaurantRetriever:
     
-    def __init__(self, text_retriever, image_retriever):
+    def __init__(self, text_retriever, image_retriever, reranker):
         
-        self.text_retriever = text_retriever,
-        self.image_retriever = image_retriever,
+        self.text_retriever = text_retriever
+        self.image_retriever = image_retriever
+        self.re_ranker = reranker_obj.get_reranker()
         
     def reciprocal_score(rank:int, constant:int = 60):
         return 1/ (rank+constant)
@@ -75,11 +76,14 @@ class RestaurantRetriever:
             raise
         
     
-    def reranker(self, sorted_list: list[dict]):
+    def reranker(self, query:str, sorted_list: list[dict]):
         
         try:
             
+            sorted_list = sorted_list[:15]
+            
             text_combination = []
+            reranker_text = []
             
             for item in sorted_list['text_results']:
                 text_combination.append(item['content'])
@@ -87,7 +91,13 @@ class RestaurantRetriever:
             for item in sorted_list['image_results']:
                 text_combination.append(f"Image description: {item['content']}")
                 
-            return "\n".join(text_combination)
+            for item in text_combination:
+                reranker_text.append([
+                    query,item
+                ])
+            
+            
+            scores = self.re_ranker.compute_score(reranker_text)
             
             
         except Exception:

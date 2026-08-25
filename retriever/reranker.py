@@ -18,3 +18,6 @@ class ReRanker:
         
     def get_reranker(self):
         return self.reranker
+    
+    
+reranker_obj = ReRanker()
