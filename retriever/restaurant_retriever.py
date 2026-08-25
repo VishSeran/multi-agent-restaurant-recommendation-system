@@ -12,8 +12,9 @@ class RestaurantRetriever:
         self.text_retriever = text_retriever
         self.image_retriever = image_retriever
         self.re_ranker = reranker_obj.get_reranker()
+        self.sort = None
         
-    def reciprocal_score(rank:int, constant:int = 60):
+    def reciprocal_score(self,rank:int, constant:int = 60):
         return 1/ (rank+constant)
     
     
@@ -44,11 +45,11 @@ class RestaurantRetriever:
                     
                 score = text_weight * self.reciprocal_score(item["rank"])
                 fuse[restaurant_id]['fusion_score'] += score
-                fuse[restaurant_id]['text_result'].append(item)
+                fuse[restaurant_id]['text_results'].append(item)
                 
                 
             for item in image_results:
-                restaurant_id = item.get['doc_id']
+                restaurant_id = item.get('doc_id', '')
                 
                 if restaurant_id not in fuse:
                     fuse[restaurant_id] = {
@@ -63,49 +64,47 @@ class RestaurantRetriever:
                 fuse[restaurant_id]['image_results'].append(item)
                 
             
-            sort = sorted(
+            self.sort = sorted(
                 fuse.values(),
                 key= lambda x: x['fusion_score'],
                 reverse=True
             )
             
-            return sort
+            return self.sort
 
         except Exception:
             logger.exception("Error in fuse result")
             raise
         
     
-    def reranker(self, query:str, sorted_list: list[dict]):
+    def reranker(self, query:str):
         
         try:
             
-            sorted_list = sorted_list[:15]
+            sorted_list = self.sort[:15]
+            reranker_pairs = []
             
-            text_combination = []
-            reranker_text = []
-            
-            for item in sorted_list['text_results']:
-                text_combination.append(item['content'])
+            for candidate in sorted_list:
                 
-            for item in sorted_list['image_results']:
-                text_combination.append(f"Image description: {item['content']}")
+                content = []
                 
-            for item in text_combination:
-                reranker_text.append([
+                for item in candidate['text_results']:
+                    content.append(item['content'])
+                    
+                for item in candidate['image_results']:
+                    content.append(
+                        f"Image description: {item['content']}"
+                    )
+                    
+                combined_text = "\n".join(content)
+                
+                reranker_pairs.append([
                     query,
-                    item
+                    combined_text
                 ])
             
-            
-            scores = self.re_ranker.compute_score(
-                reranker_text,
-                kwargs={
-                    "normalize": True
-                }
-            )
-            
-            
+            scores = self.re_ranker.compute_score(reranker_pairs, normalize = True)
+        
             for item, score in zip(sorted_list, scores):
                 item['rerank_score'] = float(score)
                 
@@ -114,10 +113,7 @@ class RestaurantRetriever:
                 key= lambda x: x["rerank_score"],
                 reverse=True
             )
-            
-            
-                
-            
+           
         except Exception:
             logger.exception("Error in reranker")
             raise
