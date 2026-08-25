@@ -28,6 +28,29 @@ class RestaurantRetriever:
         
         try:
             
+            fuse = {}
+            
+            for item in text_results:
+                restaurant_id = item.get("doc_id","")
+                
+                if restaurant_id not in fuse:
+                
+                    fuse[restaurant_id] = {
+                        "restaurant_id": restaurant_id,
+                        "fusion_score": 0.0,
+                        "text_results": [],
+                        "image_results": []
+                    }
+                    
+                score = text_weight * self.reciprocal_score(item["rank"])
+                fuse[restaurant_id]['fusion_score'] = score
+                fuse[restaurant_id]['text_result'].append(item)
+                
+                
+                
+            
+            
+            
             
         except Exception:
             logger.exception("Error in fuse result")
