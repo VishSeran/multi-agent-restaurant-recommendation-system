@@ -43,15 +43,34 @@ class RestaurantRetriever:
                     }
                     
                 score = text_weight * self.reciprocal_score(item["rank"])
-                fuse[restaurant_id]['fusion_score'] = score
+                fuse[restaurant_id]['fusion_score'] += score
                 fuse[restaurant_id]['text_result'].append(item)
                 
                 
+            for item in image_results:
+                restaurant_id = item.get['doc_id']
+                
+                if restaurant_id not in fuse:
+                    fuse[restaurant_id] = {
+                        "restaurant_id": restaurant_id,
+                        "fusion_score": 0.0,
+                        "text_results": [],
+                        "image_results": []
+                    }    
+                    
+                score = image_weight * self.reciprocal_score(item['rank'])
+                fuse[restaurant_id]['fusion_score'] += score
+                fuse[restaurant_id]['image_results'].append(item)
                 
             
+            sort = sorted(
+                fuse.values(),
+                key= lambda x: x['fusion_score'],
+                reverse=True
+            )
             
-            
-            
+            return sort
+
         except Exception:
             logger.exception("Error in fuse result")
             raise
