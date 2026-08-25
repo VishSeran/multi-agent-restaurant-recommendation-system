@@ -108,6 +108,12 @@ class RestaurantRetriever:
             
             for item, score in zip(sorted_list, scores):
                 item['rerank_score'] = float(score)
+                
+            return sorted(
+                sorted_list,
+                key= lambda x: x["rerank_score"],
+                reverse=True
+            )
             
             
                 
