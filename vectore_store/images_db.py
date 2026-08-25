@@ -96,12 +96,14 @@ class ImageVectorDB:
             
             results = []
             
-            for id, doc, meta, dist in zip(ids, docs, metas, dists):
+            for rank, (id, doc, meta, dist) in enumerate(zip(ids, docs, metas, dists), start=1):
                 results.append({
                     "doc_id": id,
                     "content": doc,
                     "metadata": meta,
-                    "distance": dist
+                    "distance": dist,
+                    "rank": rank,
+                    "source": "image"
                 })
             
             return results
