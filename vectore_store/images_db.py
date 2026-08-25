@@ -70,3 +70,46 @@ class ImageVectorDB:
         except Exception:
             logger.exception("Error in init db")
             raise
+        
+        
+    def image_query_search(self,image_query,where: dict | None = None,k: int = 5):
+        
+        try:
+            
+            if not image_query:
+                raise ValueError("Image query is missing")
+            
+            img_embeddings = embedding_handler.get_image_embeddings(image_query)
+            
+            result = self.vector_db._collection.query(
+                [img_embeddings.tolist()],
+                n_results=k,
+                where=where,
+                include=["documents","metadatas", "distances"]
+                
+            )
+            
+            ids = result.get("ids", [[]])[0]
+            docs = result.get("documents", [[]])[0]
+            metas = result.get("metadatas",[[]])[0]
+            dists = result.get("distances",[[]])[0]
+            
+            results = []
+            
+            for id, doc, meta, dist in zip(ids, docs, metas, dists):
+                results.append({
+                    "doc_id": id,
+                    "content": doc,
+                    "metadata": meta,
+                    "distance": dist
+                })
+            
+            return results
+            
+        except ValueError:
+            logger.exception("Value error in image query search")
+            raise
+        
+        except Exception:
+            logger.exception("Error in image query search")
+            raise
