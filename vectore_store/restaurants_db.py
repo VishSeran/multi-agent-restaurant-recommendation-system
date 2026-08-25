@@ -48,7 +48,7 @@ class RestaurantVectorDB:
             logger.info("Restaurant chroma db ready!!!")
             
             self.restaurant_store_retriever = self.vector_store.as_retriever(
-                search_type = "mmr",
+                search_type = "similarity",
                 search_kwargs = {
                     "k": 6
                 }
@@ -88,13 +88,14 @@ class RestaurantVectorDB:
             top_docs = await self.hybrid_retriever.ainvoke(query)
             result = []
 
-            for doc in top_docs:
-                doc_result = {}
-                doc_result['doc_id'] = doc.metadata['doc_id']
-                doc_result['content'] = doc.page_content
-                doc_result['metadata'] = doc.metadata
-                
-                result.append(doc_result)
+            for rank,doc in enumerate(top_docs,start=1):
+                result.append({
+                    'doc_id' : doc.metadata['doc_id'],
+                    'content' : doc.page_content,
+                    'metadata' : doc.metadata,
+                    'rank' : rank,
+                    'source': 'text'
+                })
                 
             return result
 
