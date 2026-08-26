@@ -13,7 +13,7 @@ class RestaurantRetriever:
         self.image_retriever = image_retriever
         self.query = query
         self.re_ranker = reranker_obj.get_reranker()
-        self.sort = None
+        self.sorted_list = None
         self.final_sort_list = None
         
     def reciprocal_score(self,rank:int, constant:int = 60):
@@ -66,13 +66,13 @@ class RestaurantRetriever:
                 fuse[restaurant_id]['image_results'].append(item)
                 
             
-            self.sort = sorted(
+            self.sorted_list = sorted(
                 fuse.values(),
                 key= lambda x: x['fusion_score'],
                 reverse=True
             )
             
-            return self.sort
+            return self.sorted_list
 
         except Exception:
             logger.exception("Error in fuse result")
@@ -83,7 +83,7 @@ class RestaurantRetriever:
         
         try:
             
-            sorted_list = self.sort[:15]
+            sorted_list = self.sorted_list[:15]
             reranker_pairs = []
             
             for candidate in sorted_list:
@@ -116,7 +116,7 @@ class RestaurantRetriever:
                 reverse=True
             )
             
-            return self.final_sort_list
+            return self.final_sort_list[:5]
            
         except Exception:
             logger.exception("Error in reranker")
