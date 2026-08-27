@@ -6,6 +6,7 @@ from langchain_core.documents import Document
 class WorkflowState(TypedDict):
     
     user_id: str
+    query: str
     user_reviews: list[dict]
     user_profile: dict
     
