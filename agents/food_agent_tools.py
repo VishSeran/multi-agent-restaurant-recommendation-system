@@ -23,3 +23,16 @@ def food_style_analyze (food_name:str) -> str:
     return f"food style analysis for {food_name}"
 
 
+@tool
+def nutrition_analze(food_name:str) -> str:
+    """Analyze nutritional characteristics such as
+    calories, protein, carbohydrates, fat, and general nutrition.
+
+    Args:
+        food_name (str): name of the dish
+
+    Returns:
+        str: analyze description
+    """
+    
+    return f"Nutrition analysis for {food_name}"
