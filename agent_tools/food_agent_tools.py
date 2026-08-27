@@ -1,9 +1,6 @@
 from langchain_core.tools import tool
 
-from configurations.logger import get_logger
 
-
-logger = get_logger("food-agent")
 
 @tool
 def food_analyze(food_name:str) -> str:
