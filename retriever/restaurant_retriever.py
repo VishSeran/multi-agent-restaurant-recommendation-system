@@ -7,12 +7,14 @@ logger = get_logger("restaurant_retriever")
 
 class RestaurantRetriever:
     
-    def __init__(self, text_retriever, image_retriever, reranker):
+    def __init__(self, query,text_retriever, image_retriever, reranker):
         
         self.text_retriever = text_retriever
         self.image_retriever = image_retriever
+        self.query = query
         self.re_ranker = reranker_obj.get_reranker()
-        self.sort = None
+        self.sorted_list = None
+        self.final_sort_list = None
         
     def reciprocal_score(self,rank:int, constant:int = 60):
         return 1/ (rank+constant)
@@ -64,24 +66,28 @@ class RestaurantRetriever:
                 fuse[restaurant_id]['image_results'].append(item)
                 
             
-            self.sort = sorted(
+            self.sorted_list = sorted(
                 fuse.values(),
                 key= lambda x: x['fusion_score'],
                 reverse=True
             )
             
-            return self.sort
+            return self.sorted_list
 
         except Exception:
             logger.exception("Error in fuse result")
             raise
         
     
-    def reranker(self, query:str):
+    def reranker(self):
         
         try:
             
-            sorted_list = self.sort[:15]
+            sorted_list = self.sorted_list[:15]
+            
+            if not self.sorted_list:
+                return []
+            
             reranker_pairs = []
             
             for candidate in sorted_list:
@@ -99,7 +105,7 @@ class RestaurantRetriever:
                 combined_text = "\n".join(content)
                 
                 reranker_pairs.append([
-                    query,
+                    self.query,
                     combined_text
                 ])
             
@@ -108,11 +114,13 @@ class RestaurantRetriever:
             for item, score in zip(sorted_list, scores):
                 item['rerank_score'] = float(score)
                 
-            return sorted(
+            self.final_sort_list =  sorted(
                 sorted_list,
                 key= lambda x: x["rerank_score"],
                 reverse=True
             )
+            
+            return self.final_sort_list[:5]
            
         except Exception:
             logger.exception("Error in reranker")
