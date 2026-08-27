@@ -57,3 +57,21 @@ class FoodAgent:
         except Exception:
             logger.exception("Error in food agent")
             raise
+        
+        
+        async def run(self, query):
+            
+            try:
+                
+                if not query:
+                    raise ValueError("Query is missing")
+                
+            
+            
+            except ValueError:
+                logger.exception("Value error in food agent run")
+                raise    
+            
+            except Exception:
+                logger.exception("Error in food agent run")
+                raise
