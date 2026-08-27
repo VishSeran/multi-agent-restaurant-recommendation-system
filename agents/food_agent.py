@@ -59,19 +59,28 @@ class FoodAgent:
             raise
         
         
-        async def run(self, query):
+    async def run(self, query):
+        
+        try:
             
-            try:
-                
-                if not query:
-                    raise ValueError("Query is missing")
-                
+            if not query:
+                raise ValueError("Query is missing")
             
+            response = await self.food_agent.ainvoke({
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": query
+                    }
+                ]
+            })
             
-            except ValueError:
-                logger.exception("Value error in food agent run")
-                raise    
-            
-            except Exception:
-                logger.exception("Error in food agent run")
-                raise
+            return response['messages'][-1].content
+        
+        except ValueError:
+            logger.exception("Value error in food agent run")
+            raise    
+        
+        except Exception:
+            logger.exception("Error in food agent run")
+            raise
