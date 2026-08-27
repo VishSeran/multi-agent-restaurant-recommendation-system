@@ -5,6 +5,7 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from configurations.configs import GROQ_MODEL
 from configurations.logger import get_logger
+from llms.llm_handler import LLMHandler
 from schema.user_profile import UserProfile
 
 
@@ -14,7 +15,7 @@ dotenv.load_dotenv()
 
 class ProfileAgent:
     
-    def __init__(self, model_name=GROQ_MODEL):
+    def __init__(self):
         
         try:
         
@@ -23,13 +24,8 @@ class ProfileAgent:
             if not groq_api:
                 raise ValueError("groq api key is missing")
             
-            self.groq_chain = ChatGroq(
-                model=model_name,
-                temperature=0.1,
-                api_key=groq_api,
-                max_tokens=2000
-                
-            ).with_structured_output(UserProfile)
+            self.llm = LLMHandler()
+            self.groq_chain = (self.llm.get_llm().with_structured_output(UserProfile))
             
             self.prompt = ChatPromptTemplate.from_messages( [
                 (

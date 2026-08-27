@@ -14,7 +14,7 @@ dotenv.load_dotenv()
 
 class LLMHandler:
 
-    def __init__(self):
+    def __init__(self, temperature:float = 0.0):
 
         try:
 
@@ -30,6 +30,7 @@ class LLMHandler:
             self.chat_groq = ChatGroq(
                 model=self.model_name,
                 api_key=api_key,
+                temperature=temperature,
                 max_tokens=5000,
                 verbose=True
             )
