@@ -76,9 +76,28 @@ class ProfileAgent:
             self.chain = self.prompt | self.groq_chain
         
         except ValueError:
-            logger.exception("Value erro in profile agent init")
+            logger.exception("Value error in profile agent init")
             raise
         
         except Exception:
             logger.exception("Error in profile agent init")
             raise 
+        
+        
+    async def generate_profiles(self, user_id, review_history) -> UserProfile:
+        
+        try:
+            
+            if not user_id:
+                raise ValueError("User id is missing")
+            
+            if not review_history:
+                raise ValueError("Review history is missing")
+            
+        except ValueError:
+            logger.exception("Value erro in generate_profiles")
+            raise
+        
+        except Exception:
+            logger.exception("Error in generate_profiles")
+            raise  
