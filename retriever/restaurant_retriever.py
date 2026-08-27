@@ -84,6 +84,10 @@ class RestaurantRetriever:
         try:
             
             sorted_list = self.sorted_list[:15]
+            
+            if not self.sorted_list:
+                return []
+            
             reranker_pairs = []
             
             for candidate in sorted_list:
