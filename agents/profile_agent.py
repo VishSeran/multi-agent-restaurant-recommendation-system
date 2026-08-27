@@ -84,7 +84,7 @@ class ProfileAgent:
             raise 
         
         
-    async def generate_profiles(self, user_id, review_history) -> UserProfile:
+    async def generate_profile(self, user_id:str, review_history:str) -> UserProfile:
         
         try:
             
@@ -94,10 +94,17 @@ class ProfileAgent:
             if not review_history:
                 raise ValueError("Review history is missing")
             
+            response = await self.chain.ainvoke({
+                "user_id": user_id,
+                "reviews": review_history
+            })
+            
+            return response
+            
         except ValueError:
-            logger.exception("Value erro in generate_profiles")
+            logger.exception("Value error in generate_profile")
             raise
         
         except Exception:
-            logger.exception("Error in generate_profiles")
+            logger.exception("Error in generate_profile")
             raise  
