@@ -1,6 +1,7 @@
 
-from langgraph.prebuilt import 
+from langgraph.graph import StateGraph
 
+from agent_workflow.workflow_state import WorkflowState
 from agents.food_agent import FoodAgent
 from agents.profile_agent import ProfileAgent
 from agents.recommendation_agent import RecommendationAgent
@@ -26,7 +27,7 @@ class MultiAgentWorkflow:
         
         try:
             
-            
+            graph = StateGraph(WorkflowState)
             
         except Exception:
             logger.exception("Error in build workflow")
