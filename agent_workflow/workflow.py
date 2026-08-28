@@ -28,10 +28,27 @@ class MultiAgentWorkflow:
         try:
             
             graph = StateGraph(WorkflowState)
+            graph.add_node("profile")
             
         except Exception:
             logger.exception("Error in build workflow")
             raise
+        
+        
+    def profile_flow(self, state: WorkflowState):
+        
+        try:
+            
+            user_id = state.get("user_id","")
+            review_history = state.get("user_reviews","")
+            
+            
+            
+        except Exception:
+            logger.exception("Error in profile agent flow")
+            raise
+        
+    
         
     
         
