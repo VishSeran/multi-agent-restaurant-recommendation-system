@@ -7,10 +7,9 @@ logger = get_logger("restaurant_retriever")
 
 class RestaurantRetriever:
     
-    def __init__(self, query,text_retriever, image_retriever):
+    def __init__(self, query):
         
-        self.text_retriever = text_retriever
-        self.image_retriever = image_retriever
+    
         self.query = query
         self.re_ranker = reranker_obj.get_reranker()
         self.sorted_list = None
@@ -23,8 +22,8 @@ class RestaurantRetriever:
     
     def fuse_result(
         self,
-        text_results: list[dict],
-        image_results: list[dict],
+        text_results: list[dict] | None,
+        image_results: list[dict] | None,
         text_weight:float = 0.7,
         image_weight:float = 0.3
     ):
@@ -64,7 +63,8 @@ class RestaurantRetriever:
                 score = image_weight * self.reciprocal_score(item['rank'])
                 fuse[restaurant_id]['fusion_score'] += score
                 fuse[restaurant_id]['image_results'].append(item)
-                
+            
+            logger.info("Fuse is updated")
             
             self.sorted_list = sorted(
                 fuse.values(),
@@ -120,6 +120,7 @@ class RestaurantRetriever:
                 reverse=True
             )
             
+            logger.info("Sorted list retrieved")
             return self.final_sort_list[:5]
            
         except Exception:

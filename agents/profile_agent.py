@@ -90,6 +90,7 @@ class ProfileAgent:
                 "user_id": user_id,
                 "reviews": review_history
             })
+            
             logger.info("profile response is fetched")
             return response
             
