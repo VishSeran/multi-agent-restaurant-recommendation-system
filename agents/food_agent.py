@@ -26,7 +26,7 @@ class FoodAgent:
                 tools=[food_analyze, food_style_analyze, nutrition_analze],
                 system_prompt="""
                 
-                            You are a food specialist agent.
+                        You are a food specialist agent.
 
                         Analyze the user's request and decide which available
                         food tools are required.
