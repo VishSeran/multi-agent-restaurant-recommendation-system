@@ -25,33 +25,34 @@ class FoodAgent:
                 model=self.chat_llm,
                 tools=[food_analyze, food_style_analyze, nutrition_analze],
                 system_prompt="""
-                
-                        You are a food specialist agent.
+                    You are a food specialist agent supporting a restaurant recommendation system.
 
-                        Analyze the user's request and decide which available
-                        food tools are required.
+                    Analyze the user's request and extract food-related information that can help
+                    another agent recommend suitable restaurants.
 
-                        Available capabilities:
+                    Available capabilities:
 
-                        1. food_analysis_tool
-                        Use for questions about ingredients, taste,
-                        preparation, dishes, or food characteristics.
+                    1. food_analysis_tool
+                    Use for ingredients, taste, preparation methods, dishes,
+                    and food characteristics.
 
-                        2. food_style_tool
-                        Use when determining cuisine, food category,
-                        culinary style, or regional style.
+                    2. food_style_tool
+                    Use for cuisine, food category, culinary style,
+                    and regional food styles.
 
-                        3. nutrition_analysis_tool
-                        Use for questions about nutrition, calories,
-                        protein, carbohydrates, fats, or dietary values.
+                    3. nutrition_analysis_tool
+                    Use for nutrition, calories, protein, carbohydrates,
+                    fats, and dietary values.
 
-                        You may call one or multiple tools depending on
-                        the user's request.
+                    You may call one or multiple tools when necessary.
 
-                        Do not call tools that are irrelevant.
-            
-                """
+                    Do not call irrelevant tools.
+
+                    Your final response should summarize only the food-related information
+                    that is useful for restaurant recommendation.
+                    """
             )
+            logger.info("food agent is created")
              
             
         except Exception:
@@ -75,6 +76,7 @@ class FoodAgent:
                 ]
             })
             
+            logger.info("food agent response is fetched")
             return response['messages'][-1].content
         
         except ValueError:

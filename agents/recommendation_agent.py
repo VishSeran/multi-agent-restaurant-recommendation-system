@@ -1,7 +1,9 @@
 
 from langchain_core.prompts import ChatPromptTemplate
+
 from configurations.logger import get_logger
 from llms.llm_handler import LLMHandler
+from schema.recommendation_schema import RecommendationResponse
 
 
 logger = get_logger("recommendation-agent")
@@ -13,7 +15,7 @@ class RecommendationAgent:
         try:
             
             self.llm_handler = LLMHandler(temperature=0.3)
-            self.llm = self.llm_handler.get_llm()
+            self.llm = self.llm_handler.get_llm().with_structured_output(RecommendationResponse)
             
             self.prompt = ChatPromptTemplate.from_messages([
                 (
@@ -25,10 +27,15 @@ class RecommendationAgent:
                     - The user's query and preferences
                     - Retrieved restaurant information
                     - Restaurant rankings and relevance scores
+                    - Food context provided by the food agent
                     - Cuisine, location, rating, price range, and other available information
 
-                    Only use the restaurant information provided in the context.
-                    Do not invent restaurants or details that are not present in the context.
+                    Use the restaurant context to determine which restaurants can be recommended.
+                    Use the food context to better understand the user's food preferences,
+                    dish requirements, cuisine expectations, and relevant food information.
+
+                    Do not invent restaurants, dishes, ratings, locations, or other details
+                    that are not present in the provided contexts.
 
                     Explain briefly why each recommended restaurant matches the user's request.
 
@@ -55,7 +62,9 @@ class RecommendationAgent:
                 )
             ])
             
+
             self.recommendation_chain = self.prompt | self.llm
+            logger.info("recommendation chain is created")
             
             
         except Exception:
@@ -74,7 +83,7 @@ class RecommendationAgent:
                 raise ValueError("restaurant_context is missing")
                         
             if not food_context:
-                raise ValueError("food_context is missing")
+                food_context = "No additional food analysis available"
             
             response = await self.recommendation_chain.ainvoke({
                 "query": query,
@@ -82,7 +91,8 @@ class RecommendationAgent:
                 "food_context": food_context
             })
             
-            return response['messages'][-1].content
+            logger.info("Response is fetched")
+            return response
         
         except ValueError:
             logger.exception("Value error in recommendation agent run")
