@@ -22,6 +22,15 @@ class MultiAgentWorkflow:
         self.build_workflow()
         
     
+    def build_workflow(self):
+        
+        try:
+            
+            
+            
+        except Exception:
+            logger.exception("Error in build workflow")
+            raise
         
     
         
