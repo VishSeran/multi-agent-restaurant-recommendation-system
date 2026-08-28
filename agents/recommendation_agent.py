@@ -67,6 +67,23 @@ class RecommendationAgent:
         
         try:
             
+            if not query:
+                raise ValueError("query is missing")
+            
+            if not restaurant_context:
+                raise ValueError("restaurant_context is missing")
+                        
+            if not food_context:
+                raise ValueError("food_context is missing")
+            
+            response = await self.recommendation_chain.ainvoke({
+                "query": query,
+                "restaurant_context": restaurant_context,
+                "food_context": food_context
+            })
+            
+            return response['messages'][-1].content
+        
         except ValueError:
             logger.exception("Value error in recommendation agent run")
             raise
