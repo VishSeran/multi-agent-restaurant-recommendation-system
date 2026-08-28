@@ -61,3 +61,16 @@ class RecommendationAgent:
         except Exception:
             logger.exception("Error in recommendation agent init")
             raise
+        
+        
+    async def run(self, query, restaurant_context, food_context):
+        
+        try:
+            
+        except ValueError:
+            logger.exception("Value error in recommendation agent run")
+            raise
+
+        except Exception:
+            logger.exception("Error in recommendation agent run")
+            raise
