@@ -29,6 +29,7 @@ class MultiAgentWorkflow:
             
             graph = StateGraph(WorkflowState)
             graph.add_node("profile", self.profile_flow_node)
+            graph.add_node("rag_node", self.rag_node)
             graph.add_node("food_analyze", self.food_analyze_node)
             
         except Exception:
@@ -60,11 +61,22 @@ class MultiAgentWorkflow:
             raise
         
         
+    async def rag_node(self, query):
+        
+        try:
+            
+        except Exception:
+            logger.exception("Error in rag node")
+            raise
+        
+        
     async def food_analyze_node(self, state: WorkflowState):
         
         try:
             
             user_query = state.get("query","")
+            
+            response = await self.food_agent.run(user_query)
             
         except Exception:
             logger.exception("Error in food analyze node")
