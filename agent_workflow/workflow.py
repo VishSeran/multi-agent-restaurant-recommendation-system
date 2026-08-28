@@ -28,14 +28,15 @@ class MultiAgentWorkflow:
         try:
             
             graph = StateGraph(WorkflowState)
-            graph.add_node("profile")
+            graph.add_node("profile", self.profile_flow_node)
+            graph.add_node("food_analyze", self.food_analyze_node)
             
         except Exception:
             logger.exception("Error in build workflow")
             raise
         
         
-    async def profile_flow(self, state: WorkflowState):
+    async def profile_flow_node(self, state: WorkflowState):
         
         try:
             
@@ -56,6 +57,17 @@ class MultiAgentWorkflow:
             
         except Exception:
             logger.exception("Error in profile agent flow")
+            raise
+        
+        
+    async def food_analyze_node(self, state: WorkflowState):
+        
+        try:
+            
+            user_query = state.get("query","")
+            
+        except Exception:
+            logger.exception("Error in food analyze node")
             raise
         
     
