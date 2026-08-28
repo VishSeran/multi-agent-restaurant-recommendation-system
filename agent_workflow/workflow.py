@@ -6,19 +6,26 @@ from agents.food_agent import FoodAgent
 from agents.profile_agent import ProfileAgent
 from agents.recommendation_agent import RecommendationAgent
 from configurations.logger import get_logger
+from retriever.restaurant_retriever import RestaurantRetriever
+from vectore_store.images_db import ImageVectorDB
+from vectore_store.restaurants_db import RestaurantVectorDB
 
 
 logger = get_logger("workflow")
 
 class MultiAgentWorkflow:
     
-    def __init__(self):
+    def __init__(self, image_db, restaurant_db, retriever):
         
         self.profile_agent = ProfileAgent()
         self.food_agent = FoodAgent()
         self.recommendation_agent = RecommendationAgent()
         
         logger.info("Agents are initialized")
+        
+        self.image_db = image_db
+        self.restaurant_db = restaurant_db
+        self.retriever = retriever
         
         self.build_workflow()
         
@@ -61,9 +68,20 @@ class MultiAgentWorkflow:
             raise
         
         
-    async def rag_node(self, query):
+    async def rag_node(self, query:str | None, image_query:str | None,
+                       image_db:ImageVectorDB, 
+                       restaurant_db:RestaurantVectorDB, 
+                       retriever:RestaurantRetriever):
         
         try:
+            
+            if query:
+                text_results = await restaurant_db.search_query(
+                    query=query
+                )
+            
+            if image_query:
+                image_results = await image_db.image_query_search()
             
         except Exception:
             logger.exception("Error in rag node")

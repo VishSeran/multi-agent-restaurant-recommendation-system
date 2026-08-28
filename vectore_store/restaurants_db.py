@@ -75,7 +75,7 @@ class RestaurantVectorDB:
             raise
         
     
-    async def search_query(self,query:str):
+    async def search_query(self,query:str) -> list[dict]:
         
         try:
             
