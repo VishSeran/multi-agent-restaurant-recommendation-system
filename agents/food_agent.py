@@ -52,6 +52,7 @@ class FoodAgent:
                     that is useful for restaurant recommendation.
                     """
             )
+            logger.info("food agent is created")
              
             
         except Exception:
@@ -75,6 +76,7 @@ class FoodAgent:
                 ]
             })
             
+            logger.info("food agent response is fetched")
             return response['messages'][-1].content
         
         except ValueError:

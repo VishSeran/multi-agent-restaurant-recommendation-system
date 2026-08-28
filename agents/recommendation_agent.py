@@ -62,7 +62,9 @@ class RecommendationAgent:
                 )
             ])
             
+
             self.recommendation_chain = self.prompt | self.llm
+            logger.info("recommendation chain is created")
             
             
         except Exception:
@@ -89,6 +91,7 @@ class RecommendationAgent:
                 "food_context": food_context
             })
             
+            logger.info("Response is fetched")
             return response
         
         except ValueError:

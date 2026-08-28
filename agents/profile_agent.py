@@ -65,6 +65,7 @@ class ProfileAgent:
             ])
             
             self.chain = self.prompt | self.groq_chain
+            logger.info("profile chain is created")
         
         except ValueError:
             logger.exception("Value error in profile agent init")
@@ -89,7 +90,7 @@ class ProfileAgent:
                 "user_id": user_id,
                 "reviews": review_history
             })
-            
+            logger.info("profile response is fetched")
             return response
             
         except ValueError:
