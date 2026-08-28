@@ -28,10 +28,37 @@ class MultiAgentWorkflow:
         try:
             
             graph = StateGraph(WorkflowState)
+            graph.add_node("profile")
             
         except Exception:
             logger.exception("Error in build workflow")
             raise
+        
+        
+    async def profile_flow(self, state: WorkflowState):
+        
+        try:
+            
+            user_id = state.get("user_id","")
+            review_history = state.get("user_reviews","")
+            
+            response = await self.profile_agent.generate_profile(
+                user_id=user_id,
+                review_history=review_history
+            ) 
+            
+            profile = response.model_dump()
+            logger.info(f"{profile['user_id']} profile updated")
+            
+            return {
+                "user_profile": profile
+            }
+            
+        except Exception:
+            logger.exception("Error in profile agent flow")
+            raise
+        
+    
         
     
         
