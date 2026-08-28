@@ -48,9 +48,11 @@ class MultiAgentWorkflow:
             ) 
             
             profile = response.model_dump()
-            state["user_profile"] = profile
-            
             logger.info(f"{profile['user_id']} profile updated")
+            
+            return {
+                "user_profile": profile
+            }
             
         except Exception:
             logger.exception("Error in profile agent flow")
