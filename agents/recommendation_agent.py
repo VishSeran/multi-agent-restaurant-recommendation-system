@@ -3,6 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from configurations.logger import get_logger
 from llms.llm_handler import LLMHandler
+from schema.recommendation_schema import RecommendationResponse
 
 
 logger = get_logger("recommendation-agent")
@@ -14,7 +15,7 @@ class RecommendationAgent:
         try:
             
             self.llm_handler = LLMHandler(temperature=0.3)
-            self.llm = self.llm_handler.get_llm()
+            self.llm = self.llm_handler.get_llm().with_structured_output(RecommendationResponse)
             
             self.prompt = ChatPromptTemplate.from_messages([
                 (
