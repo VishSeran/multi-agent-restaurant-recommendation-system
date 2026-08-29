@@ -128,13 +128,23 @@ class MultiAgentWorkflow:
             
             content = "\n\n".join(
                ( f"""
-                Restuarant ID: {restaurant_id}
+                    Restuarant ID: {restaurant_id}
+                    Text Details: {"\n\n".join(
+                        item for item in data['text_result']
+                    )}
+                    Image Details: {"\n\n".join(
+                        item for item in data['image_result']
+                    )}
                 """
                 
                 for restaurant_id, data in restaurant.items()) for restaurant in restaurants_data
             )
             
-            response = await self.food_agent.run(user_query)
+            response = await self.food_agent.run(content)
+            
+            return {
+                "food_analyst": response
+            }
             
         except Exception:
             logger.exception("Error in food analyze node")
