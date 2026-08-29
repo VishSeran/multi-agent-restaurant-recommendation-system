@@ -23,9 +23,9 @@ class MultiAgentWorkflow:
         
         logger.info("Agents are initialized")
         
-        self.image_db = image_db
-        self.restaurant_db = restaurant_db
-        self.retriever = retriever
+        self.image_db:ImageVectorDB = image_db
+        self.restaurant_db:RestaurantVectorDB = restaurant_db
+        self.retriever:RestaurantRetriever = retriever
         
         self.build_workflow()
         
@@ -36,7 +36,7 @@ class MultiAgentWorkflow:
             
             graph = StateGraph(WorkflowState)
             graph.add_node("profile", self.profile_flow_node)
-            graph.add_node("rag_node", self.rag_node)
+            graph.add_node("rag_node",self.rag_node)
             graph.add_node("food_analyze", self.food_analyze_node)
             
         except Exception:
@@ -68,20 +68,53 @@ class MultiAgentWorkflow:
             raise
         
         
-    async def rag_node(self, query:str | None, image_query:str | None,
-                       image_db:ImageVectorDB, 
-                       restaurant_db:RestaurantVectorDB, 
-                       retriever:RestaurantRetriever):
+    async def rag_node(self, state:WorkflowState):
         
         try:
             
+            query = state.get("query", "")
+            image_query = state.get("image_query", "")
+            
+            text_results = []
+            image_results = []
             if query:
-                text_results = await restaurant_db.search_query(
+                text_results = await self.restaurant_db.search_query(
                     query=query
                 )
             
             if image_query:
-                image_results = await image_db.image_query_search()
+                image_results = await self.image_db.image_query_search(
+                    image_query=image_query
+                )
+
+            self.retriever.fuse_result(
+                text_results=text_results,
+                image_results=image_results
+            )
+            
+            final_retrieved_list = self.retriever.reranker(query)
+            
+            final_results = []
+            
+            for item in final_retrieved_list:
+                
+                final_results.append({
+                    
+                   item['restaurant_id']: {
+                    
+                    "text_result": item['text_results'],
+                    "image_result": (item['image_results'] if item['image_results'] 
+                                    else "No image decription"),
+                    "fusion_score": item['fusion_score'],
+                    "rerank_score": item['rerank_score']
+                
+                    }}
+                ) 
+                
+            return {
+                "retrieved_restaurants":final_results
+            }
+            
             
         except Exception:
             logger.exception("Error in rag node")
@@ -91,10 +124,27 @@ class MultiAgentWorkflow:
     async def food_analyze_node(self, state: WorkflowState):
         
         try:
+            restaurants_data = state.get("retrieved_restaurants", "")
             
-            user_query = state.get("query","")
+            content = "\n\n".join(
+               ( f"""
+                    Restuarant ID: {restaurant_id}
+                    Text Details: {"\n\n".join(
+                        item for item in data['text_result']
+                    )}
+                    Image Details: {"\n\n".join(
+                        item for item in data['image_result']
+                    )}
+                """
+                
+                for restaurant_id, data in restaurant.items()) for restaurant in restaurants_data
+            )
             
-            response = await self.food_agent.run(user_query)
+            response = await self.food_agent.run(content)
+            
+            return {
+                "food_analyst": response
+            }
             
         except Exception:
             logger.exception("Error in food analyze node")
