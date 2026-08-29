@@ -10,7 +10,7 @@ class WorkflowState(TypedDict):
     user_reviews: list[dict]
     user_profile: dict
     
-    retrieved_restaurants: list[Document]
+    retrieved_restaurants: list[dict]
     retrieved_recipes: list[Document]
     retrieved_reviews: list[Document]
     

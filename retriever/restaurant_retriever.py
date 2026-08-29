@@ -7,10 +7,8 @@ logger = get_logger("restaurant_retriever")
 
 class RestaurantRetriever:
     
-    def __init__(self, query):
-        
-    
-        self.query = query
+    def __init__(self):
+
         self.re_ranker = reranker_obj.get_reranker()
         self.sorted_list = None
         self.final_sort_list = None
@@ -79,7 +77,7 @@ class RestaurantRetriever:
             raise
         
     
-    def reranker(self):
+    def reranker(self, query):
         
         try:
             
@@ -105,7 +103,7 @@ class RestaurantRetriever:
                 combined_text = "\n".join(content)
                 
                 reranker_pairs.append([
-                    self.query,
+                    query,
                     combined_text
                 ])
             

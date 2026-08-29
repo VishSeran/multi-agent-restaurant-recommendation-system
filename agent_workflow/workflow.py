@@ -82,6 +82,30 @@ class MultiAgentWorkflow:
             
             if image_query:
                 image_results = await image_db.image_query_search()
+
+            retriever.fuse_result(
+                text_results=text_results,
+                image_results=image_results
+            )
+            
+            final_retrieved_list = retriever.reranker(query)
+            
+            final_results = {}
+            
+            for item in final_retrieved_list:
+                final_results = {
+                    item['restaurant_id']: {
+                        "text_result": item['text_results'],
+                        "image_result": (item['image_results'] if item['image_results'] else "No image decription"),
+                        "fusion_score": item['fusion_score'],
+                        "rerank_score": item['rerank_score']
+                    }
+                }
+                
+            return {
+                "retrieved_restaurants":final_results
+            }
+            
             
         except Exception:
             logger.exception("Error in rag node")
