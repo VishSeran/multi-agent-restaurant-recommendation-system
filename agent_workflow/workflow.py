@@ -94,18 +94,22 @@ class MultiAgentWorkflow:
             
             final_retrieved_list = self.retriever.reranker(query)
             
-            final_results = {}
+            final_results = []
             
             for item in final_retrieved_list:
-                final_results[item['restaurant_id']] = {
+                
+                final_results.append({
+                    
+                   item['restaurant_id']: {
                     
                     "text_result": item['text_results'],
                     "image_result": (item['image_results'] if item['image_results'] 
                                     else "No image decription"),
                     "fusion_score": item['fusion_score'],
                     "rerank_score": item['rerank_score']
-                    
-                }
+                
+                    }}
+                ) 
                 
             return {
                 "retrieved_restaurants":final_results
@@ -120,8 +124,15 @@ class MultiAgentWorkflow:
     async def food_analyze_node(self, state: WorkflowState):
         
         try:
+            restaurants_data = state.get("retrieved_restaurants", "")
             
-            user_query = state.get("query","")
+            content = "\n\n".join(
+               ( f"""
+                Restuarant ID: {restaurant_id}
+                """
+                
+                for restaurant_id, data in restaurant.items()) for restaurant in restaurants_data
+            )
             
             response = await self.food_agent.run(user_query)
             
