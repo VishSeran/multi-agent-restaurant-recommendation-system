@@ -1,6 +1,6 @@
 
 from langgraph.graph import StateGraph
-from langchain.messages import AIMessage
+
 from agent_workflow.workflow_state import WorkflowState
 from agents.food_agent import FoodAgent
 from agents.profile_agent import ProfileAgent
@@ -126,19 +126,18 @@ class MultiAgentWorkflow:
         try:
             restaurants_data = state.get("retrieved_restaurants", "")
             
-            content = "\n\n".join(
-               ( f"""
-                    Restuarant ID: {restaurant_id}
-                    Text Details: {"\n\n".join(
-                        item for item in data['text_result']
-                    )}
-                    Image Details: {"\n\n".join(
-                        item for item in data['image_result']
-                    )}
-                """
-                
-                for restaurant_id, data in restaurant.items()) for restaurant in restaurants_data
-            )
+            content = []
+            
+            for restaurant in restaurants_data:
+                for restaurant_id, data in restaurant.items():
+                    text_content = f"""
+                        Restaurant ID: {restaurant_id}
+                        content: {(item['content'] for item in data["text_result"])}
+                        image_content: {(item['metadata'] for item in data['image_result'] if data['image_result'])}
+                    """
+                    
+                    content.append(text_content)
+
             
             response = await self.food_agent.run(content)
             
@@ -159,7 +158,7 @@ class MultiAgentWorkflow:
             query = state.get("query", "")
             logger.info("query is fetched")
             
-            restaurant_data = state.get("retrieved_restaurants", "")
+            restaurant_data = state.get("retrieved_restaurants", [])
             logger.info("restaurant data is fetched")
             
             food_context = state.get("food_analyst", "")
@@ -178,7 +177,7 @@ class MultiAgentWorkflow:
                 for item in recommendation_response.response
             ]
             
-            logger("final recommendation state updated")
+            logger.info("final recommendation state updated")
             return state
 
         except Exception:
