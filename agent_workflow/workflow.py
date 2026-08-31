@@ -6,6 +6,7 @@ from agent_workflow.workflow_state import WorkflowState
 from agents.food_agent import FoodAgent
 from agents.profile_agent import ProfileAgent
 from agents.recommendation_agent import RecommendationAgent
+from agents.relevance_evaluator_agent import RelevanceEvaluatorAgent
 from configurations.logger import get_logger
 from retriever.restaurant_retriever import RestaurantRetriever
 from schema.recommendation_schema import RecommendationResponse
@@ -20,6 +21,7 @@ class MultiAgentWorkflow:
     def __init__(self, image_db, restaurant_db, retriever):
         
         self.profile_agent = ProfileAgent()
+        self.relevance_agent = RelevanceEvaluatorAgent()
         self.food_agent = FoodAgent()
         self.recommendation_agent = RecommendationAgent()
         
@@ -39,6 +41,7 @@ class MultiAgentWorkflow:
             graph = StateGraph(WorkflowState)
             graph.add_node("profile", self.profile_flow_node)
             graph.add_node("rag_node",self.rag_node)
+            graph.add_node("relevance_checker", )
             graph.add_node("food_analyze", self.food_analyze_node)
             graph.add_node("recommendation_node", self.recommendation_node)
             
@@ -125,7 +128,14 @@ class MultiAgentWorkflow:
         except Exception:
             logger.exception("Error in rag node")
             raise
+    
+    async def relevance_checker_node(self, state:WorkflowState):
         
+        try:
+            
+        except Exception:
+            logger.exception("Error in relevance checker node")
+            raise    
         
     async def food_analyze_node(self, state: WorkflowState):
         
