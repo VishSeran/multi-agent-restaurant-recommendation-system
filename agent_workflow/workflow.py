@@ -164,6 +164,7 @@ class MultiAgentWorkflow:
         try:
             
             query = state['query']
+            image_query = state['image_query']
             document_content = state['retrieved_content']
             
             relevency_response = await self.relevance_agent.relevancy_check(
@@ -179,6 +180,7 @@ class MultiAgentWorkflow:
         except Exception:
             logger.exception("Error in relevance checker node")
             raise    
+    
         
     async def food_analyze_node(self, state: WorkflowState):
         
