@@ -104,7 +104,7 @@ class MultiAgentWorkflow:
             
             final_retrieved_list = self.retriever.reranker(query)
             
-            final_results = []
+            final_results:list[dict] = []
             
             for item in final_retrieved_list:
                 
@@ -120,31 +120,10 @@ class MultiAgentWorkflow:
                 
                     }}
                 ) 
-
-            state['retrieved_restaurants'] = final_results
-            return state
-            
-            
-        except Exception:
-            logger.exception("Error in rag node")
-            raise
-    
-    async def relevance_checker_node(self, state:WorkflowState):
-        
-        try:
-            
-        except Exception:
-            logger.exception("Error in relevance checker node")
-            raise    
-        
-    async def food_analyze_node(self, state: WorkflowState):
-        
-        try:
-            restaurants_data = state.get("retrieved_restaurants", "")
-            
+                
             content = []
-            
-            for restaurant in restaurants_data:
+                        
+            for restaurant in final_results:
                 for restaurant_id, data in restaurant.items():
                     text_content = "\n".join(
                         item['content']
@@ -169,6 +148,34 @@ class MultiAgentWorkflow:
                     content.append(restaurant_content)
 
             final_content = "\n\n".join(content)
+            
+            state['retrieved_restaurants'] = final_results
+            state['retrieved_content'] = final_content
+            
+            return state
+            
+            
+        except Exception:
+            logger.exception("Error in rag node")
+            raise
+    
+    async def relevance_checker_node(self, state:WorkflowState):
+        
+        try:
+            
+            query = state['query']
+            document_content = state['retrieved_restaurants']
+            
+        except Exception:
+            logger.exception("Error in relevance checker node")
+            raise    
+        
+    async def food_analyze_node(self, state: WorkflowState):
+        
+        try:
+            restaurants_data = state.get("retrieved_restaurants", "")
+            
+            
             response = await self.food_agent.run(final_content)
             
             state['food_analyst'] = response
