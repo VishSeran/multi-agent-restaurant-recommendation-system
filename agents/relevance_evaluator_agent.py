@@ -70,20 +70,20 @@ class RelevanceEvaluatorAgent:
             
             doc_content = []
             for item in top_text_docs:
-                content = "\n".join(
-                    item['content']
-                )
+                content = item.get("content", "")
                 
-                doc_content.append(content)
+                if content:
+                    doc_content.append(content)
                 
             if image_query:
-                top_image_docs = await image_db.image_query_search(image_query)
+                top_image_docs:list[dict] = await image_db.image_query_search(image_query)
                 
                 for item in top_image_docs:
-                    content = "\n".join(
-                        item['metadata']['cuisine']
-                    )
-                    doc_content.append(content)
+                    metadata = item.get("metadata", {})
+                    cuisine = metadata.get("cuisine", "")
+                    
+                    if cuisine:
+                        doc_content.append(f"Image cuisine information: {cuisine}")
                     
             logger.info("relevant docs are retrieved")
             final_content = "\n\n".join(doc_content)
