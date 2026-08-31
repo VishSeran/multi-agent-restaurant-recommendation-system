@@ -38,6 +38,7 @@ class MultiAgentWorkflow:
             graph.add_node("profile", self.profile_flow_node)
             graph.add_node("rag_node",self.rag_node)
             graph.add_node("food_analyze", self.food_analyze_node)
+            graph.add_node("recommendation_node", self.recommendation_node)
             
         except Exception:
             logger.exception("Error in build workflow")
@@ -151,7 +152,15 @@ class MultiAgentWorkflow:
             raise
         
     
+    async def recommendation_node(self, state: WorkflowState):
         
+        
+        try:
+            
+            
+        except Exception:
+            logger.exception("Error in recommendation process")
+            raise
     
         
         
