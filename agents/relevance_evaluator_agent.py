@@ -3,6 +3,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from configurations.logger import get_logger
 from llms.llm_handler import LLMHandler
 from schema.relevance_schema import RelevanceSchema
+from vectore_store.images_db import ImageVectorDB
+from vectore_store.restaurants_db import RestaurantVectorDB
 
 
 logger = get_logger("relevance-evaluator-agent")
@@ -53,16 +55,43 @@ class RelevanceEvaluatorAgent:
         logger.info("relevance chain is created")
     
         
-    async def relevancy_check(self, query, document_content):
+    async def relevancy_check(self, 
+                            query:str, 
+                            image_query:str|None,
+                            image_db:ImageVectorDB,
+                            restaurant_db: RestaurantVectorDB):
         
         try:
             
             if not query:
                 raise ValueError("Query is missing")
             
+            top_text_docs:list[dict] = await restaurant_db.search_query(query) 
+            
+            doc_content = []
+            for item in top_text_docs:
+                content = item.get("content", "")
+                
+                if content:
+                    doc_content.append(content)
+                
+            if image_query:
+                top_image_docs:list[dict] = await image_db.image_query_search(image_query)
+                
+                for item in top_image_docs:
+                    metadata = item.get("metadata", {})
+                    cuisine = metadata.get("cuisine", "")
+                    
+                    if cuisine:
+                        doc_content.append(f"Image cuisine information: {cuisine}")
+                    
+            logger.info("relevant docs are retrieved")
+            final_content = "\n\n".join(doc_content)
+                    
+            
             response = await self.relevance_chain.ainvoke({
                 "question": query,
-                "document_content": document_content
+                "document_content": final_content
             })
             
             response = response.model_dump()
