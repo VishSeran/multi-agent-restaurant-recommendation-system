@@ -61,9 +61,8 @@ class MultiAgentWorkflow:
             profile = response.model_dump()
             logger.info(f"{profile['user_id']} profile updated")
             
-            return {
-                "user_profile": profile
-            }
+            state['user_profile'] = profile
+            return state
             
         except Exception:
             logger.exception("Error in profile agent flow")
@@ -112,10 +111,9 @@ class MultiAgentWorkflow:
                 
                     }}
                 ) 
-                
-            return {
-                "retrieved_restaurants":final_results
-            }
+
+            state['retrieved_restaurants'] = final_results
+            return state
             
             
         except Exception:
@@ -144,9 +142,9 @@ class MultiAgentWorkflow:
             
             response = await self.food_agent.run(content)
             
-            return {
-                "food_analyst": response
-            }
+            state['food_analyst'] = response
+            
+            return state
             
         except Exception:
             logger.exception("Error in food analyze node")
@@ -173,15 +171,16 @@ class MultiAgentWorkflow:
                 food_context=food_context
             )
             
+            logger.info("recommendation is fetched")
+            
             state['final_recommendation'] = [
                 item.model_dump() 
                 for item in recommendation_response.response
             ]
             
+            logger("final recommendation state updated")
             return state
-            
-            
-            
+
         except Exception:
             logger.exception("Error in recommendation process")
             raise
