@@ -130,16 +130,30 @@ class MultiAgentWorkflow:
             
             for restaurant in restaurants_data:
                 for restaurant_id, data in restaurant.items():
-                    text_content = f"""
-                        Restaurant ID: {restaurant_id}
-                        content: {(item['content'] for item in data["text_result"])}
-                        image_content: {(item['metadata'] for item in data['image_result'] if data['image_result'])}
-                    """
+                    text_content = "\n".join(
+                        item['content']
+                        for item in data['text_result']
+                    )
                     
-                    content.append(text_content)
+                    image_content = "\n".join(
+                        item['metadata']
+                        for item in data['image_result']
+                    ) if isinstance(data['image_result'],list) else "No image description"
+                    
+                    restaurant_content = f"""
+                            Restaurant ID: {restaurant_id}
 
-            
-            response = await self.food_agent.run(content)
+                            Restaurant Details:
+                            {text_content}
+
+                            Image Details:
+                            {image_content}
+                            """
+                    
+                    content.append(restaurant_content)
+
+            final_content = "\n\n".join(content)
+            response = await self.food_agent.run(final_content)
             
             state['food_analyst'] = response
             
