@@ -172,6 +172,9 @@ class MultiAgentWorkflow:
             )
             
             logger.info("Relevancy response is fetched")
+            state['relevancy_response'] = relevency_response
+            
+            return state
             
         except Exception:
             logger.exception("Error in relevance checker node")
@@ -180,13 +183,11 @@ class MultiAgentWorkflow:
     async def food_analyze_node(self, state: WorkflowState):
         
         try:
-            restaurants_data = state.get("retrieved_restaurants", "")
+            retrieved_content = state.get("retrieved_content", "")
+            response = await self.food_agent.run(retrieved_content)
             
-            
-            response = await self.food_agent.run(final_content)
-            
+            logger.info("Food analze response is fetched")
             state['food_analyst'] = response
-            
             return state
             
         except Exception:
@@ -195,8 +196,7 @@ class MultiAgentWorkflow:
         
     
     async def recommendation_node(self, state: WorkflowState):
-        
-        
+
         try:
             
             query = state.get("query", "")
