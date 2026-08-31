@@ -1,12 +1,13 @@
 
 from langgraph.graph import StateGraph
-
+from langchain.messages import AIMessage
 from agent_workflow.workflow_state import WorkflowState
 from agents.food_agent import FoodAgent
 from agents.profile_agent import ProfileAgent
 from agents.recommendation_agent import RecommendationAgent
 from configurations.logger import get_logger
 from retriever.restaurant_retriever import RestaurantRetriever
+from schema.recommendation_schema import RecommendationResponse
 from vectore_store.images_db import ImageVectorDB
 from vectore_store.restaurants_db import RestaurantVectorDB
 
@@ -156,6 +157,29 @@ class MultiAgentWorkflow:
         
         
         try:
+            
+            query = state.get("query", "")
+            logger.info("query is fetched")
+            
+            restaurant_data = state.get("retrieved_restaurants", "")
+            logger.info("restaurant data is fetched")
+            
+            food_context = state.get("food_analyst", "")
+            logger.info("food context is fetched")
+            
+            recommendation_response:RecommendationResponse = await self.recommendation_agent.run(
+                query=query,
+                restaurant_context=restaurant_data,
+                food_context=food_context
+            )
+            
+            state['final_recommendation'] = [
+                item.model_dump() 
+                for item in recommendation_response.response
+            ]
+            
+            return state
+            
             
             
         except Exception:
