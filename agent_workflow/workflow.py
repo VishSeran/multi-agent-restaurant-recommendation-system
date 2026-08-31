@@ -41,7 +41,7 @@ class MultiAgentWorkflow:
             graph = StateGraph(WorkflowState)
             graph.add_node("profile", self.profile_flow_node)
             graph.add_node("rag_node",self.rag_node)
-            graph.add_node("relevance_checker", )
+            graph.add_node("relevance_checker", self.relevance_checker_node)
             graph.add_node("food_analyze", self.food_analyze_node)
             graph.add_node("recommendation_node", self.recommendation_node)
             
@@ -245,6 +245,15 @@ class MultiAgentWorkflow:
         except Exception:
             logger.exception("Error in profile manager")
             raise   
+        
+        
+    def relevancy_manager(self, state:WorkflowState):
+        
+        try:
+            
+        except Exception:
+            logger.exception("Error in relevancy manager")
+            raise
         
        
         
