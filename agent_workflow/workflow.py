@@ -6,6 +6,7 @@ from agent_workflow.workflow_state import WorkflowState
 from agents.food_agent import FoodAgent
 from agents.profile_agent import ProfileAgent
 from agents.recommendation_agent import RecommendationAgent
+from agents.relevance_evaluator_agent import RelevanceEvaluatorAgent
 from configurations.logger import get_logger
 from retriever.restaurant_retriever import RestaurantRetriever
 from schema.recommendation_schema import RecommendationResponse
@@ -20,6 +21,7 @@ class MultiAgentWorkflow:
     def __init__(self, image_db, restaurant_db, retriever):
         
         self.profile_agent = ProfileAgent()
+        self.relevance_agent = RelevanceEvaluatorAgent()
         self.food_agent = FoodAgent()
         self.recommendation_agent = RecommendationAgent()
         
@@ -39,6 +41,7 @@ class MultiAgentWorkflow:
             graph = StateGraph(WorkflowState)
             graph.add_node("profile", self.profile_flow_node)
             graph.add_node("rag_node",self.rag_node)
+            graph.add_node("relevance_checker", self.relevance_checker_node)
             graph.add_node("food_analyze", self.food_analyze_node)
             graph.add_node("recommendation_node", self.recommendation_node)
             
@@ -101,7 +104,7 @@ class MultiAgentWorkflow:
             
             final_retrieved_list = self.retriever.reranker(query)
             
-            final_results = []
+            final_results:list[dict] = []
             
             for item in final_retrieved_list:
                 
@@ -117,24 +120,10 @@ class MultiAgentWorkflow:
                 
                     }}
                 ) 
-
-            state['retrieved_restaurants'] = final_results
-            return state
-            
-            
-        except Exception:
-            logger.exception("Error in rag node")
-            raise
-        
-        
-    async def food_analyze_node(self, state: WorkflowState):
-        
-        try:
-            restaurants_data = state.get("retrieved_restaurants", "")
-            
+                
             content = []
-            
-            for restaurant in restaurants_data:
+                        
+            for restaurant in final_results:
                 for restaurant_id, data in restaurant.items():
                     text_content = "\n".join(
                         item['content']
@@ -159,10 +148,46 @@ class MultiAgentWorkflow:
                     content.append(restaurant_content)
 
             final_content = "\n\n".join(content)
-            response = await self.food_agent.run(final_content)
             
+            state['retrieved_restaurants'] = final_results
+            state['retrieved_content'] = final_content
+            
+            return state
+            
+            
+        except Exception:
+            logger.exception("Error in rag node")
+            raise
+    
+    async def relevance_checker_node(self, state:WorkflowState):
+        
+        try:
+            
+            query = state['query']
+            document_content = state['retrieved_content']
+            
+            relevency_response = await self.relevance_agent.relevancy_check(
+                query=query,
+                document_content=document_content
+            )
+            
+            logger.info("Relevancy response is fetched")
+            state['relevancy_response'] = relevency_response
+            
+            return state
+            
+        except Exception:
+            logger.exception("Error in relevance checker node")
+            raise    
+        
+    async def food_analyze_node(self, state: WorkflowState):
+        
+        try:
+            retrieved_content = state.get("retrieved_content", "")
+            response = await self.food_agent.run(retrieved_content)
+            
+            logger.info("Food analze response is fetched")
             state['food_analyst'] = response
-            
             return state
             
         except Exception:
@@ -171,8 +196,7 @@ class MultiAgentWorkflow:
         
     
     async def recommendation_node(self, state: WorkflowState):
-        
-        
+
         try:
             
             query = state.get("query", "")
@@ -221,6 +245,15 @@ class MultiAgentWorkflow:
         except Exception:
             logger.exception("Error in profile manager")
             raise   
+        
+        
+    def relevancy_manager(self, state:WorkflowState):
+        
+        try:
+            
+        except Exception:
+            logger.exception("Error in relevancy manager")
+            raise
         
        
         
