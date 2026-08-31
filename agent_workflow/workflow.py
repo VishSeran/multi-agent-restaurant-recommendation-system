@@ -42,7 +42,10 @@ class MultiAgentWorkflow:
             graph.add_node("food_analyze", self.food_analyze_node)
             graph.add_node("recommendation_node", self.recommendation_node)
             
-            graph.add_edge()
+            graph.add_conditional_edges(START, self.profile_manager, {
+                "profile": "profile",
+                "rag_node": "rag_node"
+            })
             
         except Exception:
             logger.exception("Error in build workflow")
@@ -202,11 +205,18 @@ class MultiAgentWorkflow:
             raise
     
         
-    async def profile_manager(self, state:WorkflowState):
+    def profile_manager(self, state:WorkflowState):
         
         try:
             
             profile_state = state['user_profile']
+            
+            if profile_state.values():
+                logger.info("Existing user profile found")
+                return "rag_node"
+            
+            logger.info("User profile missing")
+            return "profile"
             
         except Exception:
             logger.exception("Error in profile manager")
