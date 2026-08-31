@@ -164,7 +164,14 @@ class MultiAgentWorkflow:
         try:
             
             query = state['query']
-            document_content = state['retrieved_restaurants']
+            document_content = state['retrieved_content']
+            
+            relevency_response = await self.relevance_agent.relevancy_check(
+                query=query,
+                document_content=document_content
+            )
+            
+            logger.info("Relevancy response is fetched")
             
         except Exception:
             logger.exception("Error in relevance checker node")
