@@ -21,6 +21,7 @@ class WorkflowState(TypedDict):
     retrieved_reviews: list[Document]
     
     relevancy_response : dict
+    relevance_result: str
     
     food_analyst: str
     

@@ -250,6 +250,10 @@ class MultiAgentWorkflow:
     def relevancy_manager(self, state:WorkflowState):
         
         try:
+            relevancy = state['relevancy_response']
+            
+            if (('CAN_ANSWER', 'PARTIAL')) in relevancy:
+                logger.info("user query is relevant to content")
             
         except Exception:
             logger.exception("Error in relevancy manager")
