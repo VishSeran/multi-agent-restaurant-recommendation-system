@@ -21,5 +21,5 @@ class WorkflowState(TypedDict):
     
     food_analyst: str
     
-    final_recommendationL: list[dict]
+    final_recommendation: list[dict]
     
