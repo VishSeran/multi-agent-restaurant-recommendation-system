@@ -51,3 +51,19 @@ class RelevanceEvaluatorAgent:
         
         self.relevance_chain = self.prompt | self.llm
         logger.info("relevance chain is created")
+    
+        
+    async def relevancy_check(self, query):
+        
+        try:
+            
+            if not query:
+                raise ValueError("Query is missing")
+            
+        except ValueError:
+            logger.exception("Value error in relevancy check")
+            raise
+        
+        except Exception:
+            logger.exception("Error in relevancy check")
+            raise 
