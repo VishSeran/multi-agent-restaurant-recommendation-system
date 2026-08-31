@@ -1,5 +1,6 @@
 
 from langgraph.graph import StateGraph
+from langgraph.graph import START, END
 
 from agent_workflow.workflow_state import WorkflowState
 from agents.food_agent import FoodAgent
@@ -40,6 +41,8 @@ class MultiAgentWorkflow:
             graph.add_node("rag_node",self.rag_node)
             graph.add_node("food_analyze", self.food_analyze_node)
             graph.add_node("recommendation_node", self.recommendation_node)
+            
+            graph.add_edge()
             
         except Exception:
             logger.exception("Error in build workflow")
@@ -199,9 +202,15 @@ class MultiAgentWorkflow:
             raise
     
         
+    async def profile_manager(self, state:WorkflowState):
         
-    
-        
+        try:
+            
+            profile_state = state['user_profile']
+            
+        except Exception:
+            logger.exception("Error in profile manager")
+            raise   
         
        
         
