@@ -53,12 +53,22 @@ class RelevanceEvaluatorAgent:
         logger.info("relevance chain is created")
     
         
-    async def relevancy_check(self, query):
+    async def relevancy_check(self, query, document_content):
         
         try:
             
             if not query:
                 raise ValueError("Query is missing")
+            
+            response = await self.relevance_chain.ainvoke({
+                "question": query,
+                "document_content": document_content
+            })
+            
+            response = response.model_dump()
+            logger.info("Relevancy response is fetched")
+            
+            return response
             
         except ValueError:
             logger.exception("Value error in relevancy check")
