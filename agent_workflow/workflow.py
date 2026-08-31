@@ -1,5 +1,6 @@
 
 from langgraph.graph import StateGraph
+from langgraph.graph import START, END
 
 from agent_workflow.workflow_state import WorkflowState
 from agents.food_agent import FoodAgent
@@ -7,6 +8,7 @@ from agents.profile_agent import ProfileAgent
 from agents.recommendation_agent import RecommendationAgent
 from configurations.logger import get_logger
 from retriever.restaurant_retriever import RestaurantRetriever
+from schema.recommendation_schema import RecommendationResponse
 from vectore_store.images_db import ImageVectorDB
 from vectore_store.restaurants_db import RestaurantVectorDB
 
@@ -38,6 +40,12 @@ class MultiAgentWorkflow:
             graph.add_node("profile", self.profile_flow_node)
             graph.add_node("rag_node",self.rag_node)
             graph.add_node("food_analyze", self.food_analyze_node)
+            graph.add_node("recommendation_node", self.recommendation_node)
+            
+            graph.add_conditional_edges(START, self.profile_manager, {
+                "profile": "profile",
+                "rag_node": "rag_node"
+            })
             
         except Exception:
             logger.exception("Error in build workflow")
@@ -59,9 +67,8 @@ class MultiAgentWorkflow:
             profile = response.model_dump()
             logger.info(f"{profile['user_id']} profile updated")
             
-            return {
-                "user_profile": profile
-            }
+            state['user_profile'] = profile
+            return state
             
         except Exception:
             logger.exception("Error in profile agent flow")
@@ -110,10 +117,9 @@ class MultiAgentWorkflow:
                 
                     }}
                 ) 
-                
-            return {
-                "retrieved_restaurants":final_results
-            }
+
+            state['retrieved_restaurants'] = final_results
+            return state
             
             
         except Exception:
@@ -126,37 +132,95 @@ class MultiAgentWorkflow:
         try:
             restaurants_data = state.get("retrieved_restaurants", "")
             
-            content = "\n\n".join(
-               ( f"""
-                    Restuarant ID: {restaurant_id}
-                    Text Details: {"\n\n".join(
-                        item for item in data['text_result']
-                    )}
-                    Image Details: {"\n\n".join(
-                        item for item in data['image_result']
-                    )}
-                """
-                
-                for restaurant_id, data in restaurant.items()) for restaurant in restaurants_data
-            )
+            content = []
             
-            response = await self.food_agent.run(content)
+            for restaurant in restaurants_data:
+                for restaurant_id, data in restaurant.items():
+                    text_content = "\n".join(
+                        item['content']
+                        for item in data['text_result']
+                    )
+                    
+                    image_content = "\n".join(
+                        item['metadata']
+                        for item in data['image_result']
+                    ) if isinstance(data['image_result'],list) else "No image description"
+                    
+                    restaurant_content = f"""
+                            Restaurant ID: {restaurant_id}
+
+                            Restaurant Details:
+                            {text_content}
+
+                            Image Details:
+                            {image_content}
+                            """
+                    
+                    content.append(restaurant_content)
+
+            final_content = "\n\n".join(content)
+            response = await self.food_agent.run(final_content)
             
-            return {
-                "food_analyst": response
-            }
+            state['food_analyst'] = response
+            
+            return state
             
         except Exception:
             logger.exception("Error in food analyze node")
             raise
         
     
+    async def recommendation_node(self, state: WorkflowState):
         
+        
+        try:
+            
+            query = state.get("query", "")
+            logger.info("query is fetched")
+            
+            restaurant_data = state.get("retrieved_restaurants", [])
+            logger.info("restaurant data is fetched")
+            
+            food_context = state.get("food_analyst", "")
+            logger.info("food context is fetched")
+            
+            recommendation_response:RecommendationResponse = await self.recommendation_agent.run(
+                query=query,
+                restaurant_context=restaurant_data,
+                food_context=food_context
+            )
+            
+            logger.info("recommendation is fetched")
+            
+            state['final_recommendation'] = [
+                item.model_dump() 
+                for item in recommendation_response.response
+            ]
+            
+            logger.info("final recommendation state updated")
+            return state
+
+        except Exception:
+            logger.exception("Error in recommendation process")
+            raise
     
         
+    def profile_manager(self, state:WorkflowState):
         
-    
-        
+        try:
+            
+            profile_state = state['user_profile']
+            
+            if profile_state.values():
+                logger.info("Existing user profile found")
+                return "rag_node"
+            
+            logger.info("User profile missing")
+            return "profile"
+            
+        except Exception:
+            logger.exception("Error in profile manager")
+            raise   
         
        
         
