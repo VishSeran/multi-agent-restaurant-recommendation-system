@@ -78,6 +78,37 @@ class MultiAgentWorkflow:
             raise
         
         
+    async def relevance_checker_node(self, state:WorkflowState):
+            
+            try:
+                
+                query = state['query']
+                image_query = state['image_query']
+                
+                relevency_response = await self.relevance_agent.relevancy_check(
+                    query=query,
+                    image_query=image_query
+                )
+                
+                logger.info("Relevancy response is fetched")
+                state['relevancy_response'] = relevency_response
+                
+                if (('CAN_ANSWER', 'PARTIAL')) in relevency_response:
+                    logger.info("Query is relevant to content")
+                    state['relevance_result'] = "Query is relevant to the restaurant data"
+                
+                else:
+                    logger.info("Query is relevant to content")
+                    state['final_recommendation'] = "Query is not relevant to restaurant data. please try with restaurant related query"
+                    
+                
+                return state
+                
+            except Exception:
+                logger.exception("Error in relevance checker node")
+                raise 
+        
+        
     async def rag_node(self, state:WorkflowState):
         
         try:
@@ -159,26 +190,7 @@ class MultiAgentWorkflow:
             logger.exception("Error in rag node")
             raise
     
-    async def relevance_checker_node(self, state:WorkflowState):
-        
-        try:
-            
-            query = state['query']
-            image_query = state['image_query']
-            
-            relevency_response = await self.relevance_agent.relevancy_check(
-                query=query,
-                image_query=image_query
-            )
-            
-            logger.info("Relevancy response is fetched")
-            state['relevancy_response'] = relevency_response
-            
-            return state
-            
-        except Exception:
-            logger.exception("Error in relevance checker node")
-            raise 
+    
     
         
     async def food_analyze_node(self, state: WorkflowState):
@@ -254,14 +266,11 @@ class MultiAgentWorkflow:
             relevancy = state['relevancy_response']
             
             if (('CAN_ANSWER', 'PARTIAL')) in relevancy:
-                logger.info("user query is relevant to content")
                 return "rag_node"
             
             else:
-                logger.info("User query is not relevant to content")
                 return END
-            
-            
+ 
         except Exception:
             logger.exception("Error in relevancy manager")
             raise
