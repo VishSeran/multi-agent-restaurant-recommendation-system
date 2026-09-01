@@ -40,14 +40,18 @@ class MultiAgentWorkflow:
             
             graph = StateGraph(WorkflowState)
             graph.add_node("profile", self.profile_flow_node)
-            graph.add_node("rag_node",self.rag_node)
             graph.add_node("relevance_checker", self.relevance_checker_node)
+            graph.add_node("rag_node",self.rag_node)
             graph.add_node("food_analyze", self.food_analyze_node)
             graph.add_node("recommendation_node", self.recommendation_node)
             
             graph.add_conditional_edges(START, self.profile_manager, {
                 "profile": "profile",
                 "rag_node": "rag_node"
+            })
+            graph.add_conditional_edges("relevance_cheker", self.relevancy_manager,{
+                "rag_node": "rag_node",
+                "end": END
             })
             
         except Exception:
@@ -269,7 +273,7 @@ class MultiAgentWorkflow:
                 return "rag_node"
             
             else:
-                return END
+                return 'end'
  
         except Exception:
             logger.exception("Error in relevancy manager")
