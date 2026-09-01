@@ -3,6 +3,7 @@ from typing import TypedDict
 from langchain_core.documents import Document
 
 from retriever.restaurant_retriever import RestaurantRetriever
+from schema.relevance_schema import RelevanceSchema
 from vectore_store.images_db import ImageVectorDB
 from vectore_store.restaurants_db import RestaurantVectorDB
 
@@ -20,7 +21,7 @@ class WorkflowState(TypedDict):
     retrieved_recipes: list[Document]
     retrieved_reviews: list[Document]
     
-    relevancy_response : dict
+    relevancy_response : RelevanceSchema
     relevance_result: str
     
     food_analyst: str

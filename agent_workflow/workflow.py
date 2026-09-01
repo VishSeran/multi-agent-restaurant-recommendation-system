@@ -10,6 +10,7 @@ from agents.relevance_evaluator_agent import RelevanceEvaluatorAgent
 from configurations.logger import get_logger
 from retriever.restaurant_retriever import RestaurantRetriever
 from schema.recommendation_schema import RecommendationResponse
+from schema.relevance_schema import RelevanceSchema
 from vectore_store.images_db import ImageVectorDB
 from vectore_store.restaurants_db import RestaurantVectorDB
 
@@ -30,6 +31,7 @@ class MultiAgentWorkflow:
         self.image_db:ImageVectorDB = image_db
         self.restaurant_db:RestaurantVectorDB = restaurant_db
         self.retriever:RestaurantRetriever = retriever
+        self.workflow =  None
         
         self.build_workflow()
         
@@ -40,15 +42,28 @@ class MultiAgentWorkflow:
             
             graph = StateGraph(WorkflowState)
             graph.add_node("profile", self.profile_flow_node)
-            graph.add_node("rag_node",self.rag_node)
             graph.add_node("relevance_checker", self.relevance_checker_node)
+            graph.add_node("rag_node",self.rag_node)
             graph.add_node("food_analyze", self.food_analyze_node)
             graph.add_node("recommendation_node", self.recommendation_node)
-            
+
             graph.add_conditional_edges(START, self.profile_manager, {
-                "profile": "profile",
-                "rag_node": "rag_node"
+                "relevance_checker": "relevance_checker",
+                "profile": "profile"
             })
+            
+            graph.add_edge("profile", "relevance_checker")
+            
+            graph.add_conditional_edges("relevance_checker", self.relevancy_manager,{
+                "rag_node": "rag_node",
+                "end": END
+            })
+            graph.add_edge("rag_node", "food_analyze")
+            graph.add_edge("food_analyze", "recommendation_node")
+            graph.add_edge("recommendation_node", END)
+            
+            self.workflow = graph.compile()
+            logger.info("Workflow compiled successfully")
             
         except Exception:
             logger.exception("Error in build workflow")
@@ -76,6 +91,42 @@ class MultiAgentWorkflow:
         except Exception:
             logger.exception("Error in profile agent flow")
             raise
+        
+        
+    async def relevance_checker_node(self, state:WorkflowState):
+            
+            try:
+                
+                query = state['query']
+                image_query = state['image_query']
+                
+                relevency_response:RelevanceSchema = await self.relevance_agent.relevancy_check(
+                    query=query,
+                    image_query=image_query
+                )
+                
+                logger.info("Relevancy response is fetched")
+                state['relevancy_response'] = relevency_response
+                
+                if relevency_response.relevancy in ("CAN_ANSWER", "PARTIAL"):
+                    logger.info("Query is relevant to content")
+                    state['relevance_result'] = "Query is relevant to the restaurant data"
+                
+                else:
+                    logger.info("Query is relevant to content")
+                    state['relevance_result'] = "Query is not relevant to restaurant data. please try with restaurant related query"
+                    state['final_recommendation'] = [
+                        {
+                            "result": "Query is not relevant to restaurant data. please try with restaurant related query"
+                        }
+                    ]
+                    
+                
+                return state
+                
+            except Exception:
+                logger.exception("Error in relevance checker node")
+                raise 
         
         
     async def rag_node(self, state:WorkflowState):
@@ -148,6 +199,8 @@ class MultiAgentWorkflow:
                     content.append(restaurant_content)
 
             final_content = "\n\n".join(content)
+            if final_content:
+                logger.info("Final content is ready")
             
             state['retrieved_restaurants'] = final_results
             state['retrieved_content'] = final_content
@@ -159,29 +212,7 @@ class MultiAgentWorkflow:
             logger.exception("Error in rag node")
             raise
     
-    async def relevance_checker_node(self, state:WorkflowState):
-        
-        try:
-            
-            query = state['query']
-            image_query = state['image_query']
-            document_content = state['retrieved_content']
-            
-            relevency_response = await self.relevance_agent.relevancy_check(
-                query=query,
-                document_content=document_content
-            )
-            
-            logger.info("Relevancy response is fetched")
-            state['relevancy_response'] = relevency_response
-            
-            return state
-            
-        except Exception:
-            logger.exception("Error in relevance checker node")
-            raise    
-    
-        
+   
     async def food_analyze_node(self, state: WorkflowState):
         
         try:
@@ -235,11 +266,11 @@ class MultiAgentWorkflow:
         
         try:
             
-            profile_state = state['user_profile']
+            profile_state = state.get("user_profile",{})
             
-            if profile_state.values():
+            if profile_state:
                 logger.info("Existing user profile found")
-                return "rag_node"
+                return "relevance_checker"
             
             logger.info("User profile missing")
             return "profile"
@@ -252,15 +283,20 @@ class MultiAgentWorkflow:
     def relevancy_manager(self, state:WorkflowState):
         
         try:
-            relevancy = state['relevancy_response']
+            relevancy:RelevanceSchema  = state['relevancy_response']
             
-            if (('CAN_ANSWER', 'PARTIAL')) in relevancy:
-                logger.info("user query is relevant to content")
+            if relevancy.relevancy in ["CAN_ANSWER", "PARTIAL"]
+                return "rag_node"
             
+            else:
+                return 'end'
+ 
         except Exception:
             logger.exception("Error in relevancy manager")
             raise
         
+        
+    
        
         
         
