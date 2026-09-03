@@ -39,5 +39,5 @@ class MCPServer:
     
     
 mcpserver = MCPServer()
-server = mcpserver.get_mcp_server()
+mcp_server = mcpserver.get_mcp_server()
     
