@@ -9,9 +9,10 @@ logger = get_logger("mcp-server-config")
 
 BASE_DIR = Path(__file__).resolve().parent
 RESTAURANT_DIR = (BASE_DIR / "dataset" / "restaurants").resolve()
+USER_REVIEW_DIR = (BASE_DIR / "dataset" / "user_reviews").resolve()
 
 @mcp_server.tool()
-def read_restaurant_data(file_name:str, ctx:Context) ->str:
+async def read_restaurant_data(file_name:str | None, ctx:Context) ->str:
     
     """
     Read a JSON file from the restaurant dataset directory.
@@ -22,7 +23,7 @@ def read_restaurant_data(file_name:str, ctx:Context) ->str:
     
     try:
         if not file_name:
-            raise ValueError("File name is missing")
+            file_name = "structured_restaurant_data.json"
         
         requested_file = (RESTAURANT_DIR / file_name).resolve()
         
@@ -36,26 +37,50 @@ def read_restaurant_data(file_name:str, ctx:Context) ->str:
             raise ValueError(f"{file_name} is not found")
         
         content = requested_file.read_text(encoding="utf-8")
-        ctx.info(f"{file_name} content is fetched")
+        await ctx.info(f"{file_name} content is fetched")
         
         return content
     
     except ValueError as e:
-        ctx.error(f"Value error in read restaurant data: {e}")
+        await ctx.error(f"Value error in read restaurant data: {e}")
         logger.exception("Value error in read restaurant data")
         raise   
     
     except OSError as e:
-        ctx.error("Unable to read the requested file")
+        await ctx.error("Unable to read the requested file")
         logger.error("Filesystem error while reading %s: %s", file_name, e)
         raise
     
     except Exception:
-        ctx.error("An unexpected server error occurred")
+        
+        await ctx.error("An unexpected server error occurred")
         logger.exception(
             "Unexpected error in read_restaurant_data for file %s",
             file_name
         )
         raise
+    
 
 
+async def read_review_data(file_name: str | None, ctx: Context):
+    
+    try:
+        
+        if not file_name:
+            file_name = "augmented_user_review.json"
+            
+        requested_file = (USER_REVIEW_DIR / file_name).resolve()
+        
+        if USER_REVIEW_DIR not in requested_file.parent:
+            raise ValueError("Access outside the restaurant directory is forbidden")
+        
+        if requested_file.suffix.lower() != ".json":
+            raise ValueError("Only json file are allowed to read")
+        
+    except ValueError as e:
+        await ctx.error(f"An unexpected server error occurred: {e}")
+        logger.exception(
+            "Unexpected error in read_restaurant_data for file %s",
+            file_name
+        )
+        raise
