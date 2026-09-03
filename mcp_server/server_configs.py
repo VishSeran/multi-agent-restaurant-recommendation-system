@@ -110,7 +110,7 @@ async def read_review_data(file_name: str | None, ctx: Context):
         )
         raise
 
-
+@mcp_server.tool()
 async def read_recipe_data(file_name:str | None, ctx:Context):
     
     try:
@@ -133,8 +133,7 @@ async def read_recipe_data(file_name:str | None, ctx:Context):
         await ctx.info("recipe data is fetched successfully")
         
         return content
-        
-        
+
     except ValueError as e:
         await ctx.error(f"Unexpected value error in server: {e}")
         logger.exception(
@@ -146,4 +145,16 @@ async def read_recipe_data(file_name:str | None, ctx:Context):
     except Exception:
         await ctx.error("Unexpected server error")
         logger.exception("Unexpected server error in %s", file_name)
+        raise
+    
+    
+@mcp_server.resource()
+async def get_clinary_map(ctx:Context) -> str:
+    
+    try:
+        
+        
+    except Exception:
+        await ctx.error("Unexpected Error in get culinary map")
+        logger.exception("Unexpected Error in get culinary map")
         raise
