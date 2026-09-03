@@ -10,6 +10,7 @@ logger = get_logger("mcp-server-config")
 BASE_DIR = Path(__file__).resolve().parent
 RESTAURANT_DIR = (BASE_DIR / "dataset" / "restaurants").resolve()
 USER_REVIEW_DIR = (BASE_DIR / "dataset" / "user_reviews").resolve()
+RECIPE_DIR = (BASE_DIR / "dataset" / "food_recipes").resolve()
 
 @mcp_server.tool()
 async def read_restaurant_data(file_name:str | None, ctx:Context) ->str:
@@ -79,7 +80,7 @@ async def read_review_data(file_name: str | None, ctx: Context):
         requested_file = (USER_REVIEW_DIR / file_name).resolve()
         
         if USER_REVIEW_DIR not in requested_file.parent:
-            raise ValueError("Access outside the restaurant directory is forbidden")
+            raise ValueError("Access outside the user review directory is forbidden")
         
         if requested_file.suffix.lower() != ".json":
             raise ValueError("Only json file are allowed to read")
@@ -88,6 +89,8 @@ async def read_review_data(file_name: str | None, ctx: Context):
             raise ValueError(f"{file_name} is not found")
         
         content = requested_file.read_text(encoding="utf-8")
+        await ctx.info("review data is fetched successfully")
+        
         return content
         
     except ValueError as e:
@@ -111,6 +114,26 @@ async def read_review_data(file_name: str | None, ctx: Context):
 async def read_recipe_data(file_name:str | None, ctx:Context):
     
     try:
+        
+        if not file_name:
+            file_name = "augmented_food_recipe.json"
+        
+        requested_file = (RECIPE_DIR/file_name).resolve()
+        
+        if RECIPE_DIR not in requested_file.parent:
+            raise ValueError("Access outside the recipe directory is forbidden")
+        
+        if requested_file.suffix.lower() != ".json":
+            raise ValueError("Only json file are allowed to read")
+        
+        if not requested_file.is_file():
+            raise ValueError(f"{file_name} is not a file; file not found")
+        
+        content = requested_file.read_text(encoding="utf-8")
+        await ctx.info("recipe data is fetched successfully")
+        
+        return content
+        
         
     except ValueError as e:
         await ctx.error(f"Unexpected value error in server: {e}")
