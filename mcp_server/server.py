@@ -32,4 +32,12 @@ class MCPServer:
         except Exception:
             logger.exception("Error in mcp server init")
             raise
+        
+    
+    def get_mcp_server(self):
+        return self.mcp
+    
+    
+mcpserver = MCPServer()
+server = mcpserver.get_mcp_server()
     
