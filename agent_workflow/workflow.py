@@ -285,7 +285,7 @@ class MultiAgentWorkflow:
         try:
             relevancy:RelevanceSchema  = state['relevancy_response']
             
-            if relevancy.relevancy in ["CAN_ANSWER", "PARTIAL"]
+            if relevancy.relevancy in ["CAN_ANSWER", "PARTIAL"]:
                 return "rag_node"
             
             else:
