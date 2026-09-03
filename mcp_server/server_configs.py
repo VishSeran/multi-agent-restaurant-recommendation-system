@@ -11,6 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent
 RESTAURANT_DIR = (BASE_DIR / "dataset" / "restaurants").resolve()
 USER_REVIEW_DIR = (BASE_DIR / "dataset" / "user_reviews").resolve()
 RECIPE_DIR = (BASE_DIR / "dataset" / "food_recipes").resolve()
+CULINARY_MAP_DIR = (BASE_DIR / "dataset" / "California-Culinary-Map.txt").resolve()
 
 @mcp_server.tool()
 async def read_restaurant_data(file_name:str | None, ctx:Context) ->str:
@@ -151,7 +152,13 @@ async def read_recipe_data(file_name:str | None, ctx:Context):
 @mcp_server.resource()
 async def get_clinary_map(ctx:Context) -> str:
     
+    """The full raw California Culinary Map.
+    Contains detailed descriptions of 100+ restaurants across California
+    including their vibes, cuisines, ratings, and price ranges."""
+    
     try:
+        
+        return CULINARY_MAP_DIR.read_text(encoding="utf-8")
         
         
     except Exception:
