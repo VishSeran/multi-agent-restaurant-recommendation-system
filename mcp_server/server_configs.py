@@ -61,8 +61,15 @@ async def read_restaurant_data(file_name:str | None, ctx:Context) ->str:
         raise
     
 
-
+@mcp_server.tool()
 async def read_review_data(file_name: str | None, ctx: Context):
+    
+    """
+        Read a JSON file from the user reviews dataset directory.
+    
+        Access is restricted to files located inside:
+        dataset/restaurants/
+    """
     
     try:
         
@@ -77,10 +84,43 @@ async def read_review_data(file_name: str | None, ctx: Context):
         if requested_file.suffix.lower() != ".json":
             raise ValueError("Only json file are allowed to read")
         
+        if not requested_file.is_file():
+            raise ValueError(f"{file_name} is not found")
+        
+        content = requested_file.read_text(encoding="utf-8")
+        return content
+        
     except ValueError as e:
         await ctx.error(f"An unexpected server error occurred: {e}")
         logger.exception(
-            "Unexpected error in read_restaurant_data for file %s",
+            "Unexpected error in read_review_data for file %s",
             file_name
         )
+        raise
+    
+    except Exception:
+            
+        await ctx.error("An unexpected server error occurred")
+        logger.exception(
+            "Unexpected error in read_review_data for file %s",
+            file_name
+        )
+        raise
+
+
+async def read_recipe_data(file_name:str | None, ctx:Context):
+    
+    try:
+        
+    except ValueError as e:
+        await ctx.error(f"Unexpected value error in server: {e}")
+        logger.exception(
+            "Unexpected error in read recipe data for file %s",
+            file_name
+        )
+        raise
+    
+    except Exception:
+        await ctx.error("Unexpected server error")
+        logger.exception("Unexpected server error in %s", file_name)
         raise
