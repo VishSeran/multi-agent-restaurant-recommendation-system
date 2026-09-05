@@ -19,3 +19,15 @@ class MCPClient:
         except Exception:
             logger.exception("Error in mcp client init")
             raise
+        
+        
+    async def connect_to_server(self):
+        
+        try:
+            
+            
+        except Exception:
+            logger.exception("Error in mcp server connection")
+            raise
+        
+    
