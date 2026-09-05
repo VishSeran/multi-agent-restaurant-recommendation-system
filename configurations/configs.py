@@ -13,6 +13,12 @@ IMAGE_EMBEDDING_MODEL = "openai/clip-vit-base-patch32"
 DB_DIR = str((Path.cwd() / "chroma_multimodal").resolve())
 Base_dir = Path.cwd().resolve()
 
+BASE_DIR = Path(__file__).resolve().parent
+RESTAURANT_DIR = (BASE_DIR / "dataset" / "restaurants").resolve()
+USER_REVIEW_DIR = (BASE_DIR / "dataset" / "user_reviews").resolve()
+RECIPE_DIR = (BASE_DIR / "dataset" / "food_recipes").resolve()
+CULINARY_MAP_DIR = (BASE_DIR / "dataset" / "California-Culinary-Map.txt").resolve()
+
 def is_url(path:str) -> bool:
     
     parsed = urlparse(path)
