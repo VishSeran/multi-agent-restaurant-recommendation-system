@@ -3,7 +3,7 @@ from fastmcp import Context
 
 from fastmcp import FastMCP
 from agent_workflow.workflow import MultiAgentWorkflow
-from configurations.configs import CULINARY_MAP_DIR, RECIPE_DIR, RESTAURANT_DIR, USER_REVIEW_DIR
+from configurations.configs import CULINARY_MAP_DIR, RECIPE_DIR, RESTAURANT_DIR, USER_REVIEW_DIR, BASE_DIR
 from configurations.logger import get_logger
 
 
@@ -198,6 +198,14 @@ class MCPServer:
                 logger.exception("Unexpected Error in get culinary map")
                 raise
 
-mcpserver = MCPServer()
-
+if __name__ == "__main__":
+    print("Starting HTTP MCP Server on http://127.0.0.1:8000")
+    print(f"Workspace roots: {BASE_DIR}")
+    
+    mcpserver = MCPServer()
+    mcpserver.mcp.run(
+        transport="http",
+        host = "127.0.0.1",
+        port = 8000
+    )
     
