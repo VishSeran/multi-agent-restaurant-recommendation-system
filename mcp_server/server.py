@@ -45,7 +45,7 @@ class MCPServer:
     
     def register_tools(self):
         
-        @mcp_server.tool()
+        @self.mcp.tool()
         async def read_restaurant_data(file_name:str | None, ctx:Context) ->str:
             
             """
@@ -95,7 +95,7 @@ class MCPServer:
                 raise
             
 
-        @mcp_server.tool()
+        @self.mcp.tool()
         async def read_review_data(file_name: str | None, ctx: Context):
             
             """
@@ -143,7 +143,7 @@ class MCPServer:
                 )
                 raise
 
-        @mcp_server.tool()
+        @self.mcp.tool()
         async def read_recipe_data(file_name:str | None, ctx:Context):
             
             try:
@@ -181,7 +181,7 @@ class MCPServer:
                 raise
             
             
-        @mcp_server.resource()
+        @self.mcp.resource()
         async def get_clinary_map(ctx:Context) -> str:
             
             """The full raw California Culinary Map.
@@ -201,5 +201,5 @@ class MCPServer:
     
     
 mcpserver = MCPServer()
-mcp_server = mcpserver.get_mcp_server()
+
     
