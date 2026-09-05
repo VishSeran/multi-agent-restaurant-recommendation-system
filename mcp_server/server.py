@@ -197,9 +197,7 @@ class MCPServer:
                 await ctx.error("Unexpected Error in get culinary map")
                 logger.exception("Unexpected Error in get culinary map")
                 raise
-   
-    
-    
+
 mcpserver = MCPServer()
 
     
