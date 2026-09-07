@@ -79,4 +79,14 @@ class MCPClient:
         except Exception:
             logger.exception("Error in list tools")
             raise
+        
+        
+    async def list_resources(self):
+        
+        try:
+            
+            
+        except Exception:
+            logger.exception("Error in session resources listing")
+            raise
     
