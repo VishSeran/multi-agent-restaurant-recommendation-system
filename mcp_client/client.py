@@ -1,7 +1,7 @@
 from contextlib import AsyncExitStack
 from mcp.client.streamable_http import streamable_http_client
 from mcp.client import ClientSession
-from mcp import ListToolsResult
+from mcp import ListToolsResult,ListResourcesResult
 
 from configurations.configs import BASE_DIR
 from configurations.logger import get_logger
@@ -84,7 +84,12 @@ class MCPClient:
     async def list_resources(self):
         
         try:
+            if self.session is None:
+                raise RuntimeError("Client session not found")
             
+            resources:ListResourcesResult = await self.session.list_resources()
+            logger.info("Session resources are listed")
+            return resources
             
         except Exception:
             logger.exception("Error in session resources listing")
