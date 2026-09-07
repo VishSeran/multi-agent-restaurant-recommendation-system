@@ -63,5 +63,12 @@ class MCPClient:
             self.exit_stack = AsyncExitStack()
             
             raise
+    
+    async def list_tools(self):
         
+        try:
+            
+        except Exception:
+            logger.exception("Error in list tools")
+            raise
     
