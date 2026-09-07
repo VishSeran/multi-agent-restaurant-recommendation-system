@@ -1,6 +1,7 @@
 from contextlib import AsyncExitStack
 from mcp.client.streamable_http import streamable_http_client
 from mcp.client import ClientSession
+from mcp import ListToolsResult
 
 from configurations.configs import BASE_DIR
 from configurations.logger import get_logger
@@ -68,6 +69,13 @@ class MCPClient:
         
         try:
             
+            if self.session is None:
+                raise RuntimeError("Client session not found")
+            
+            tools:ListToolsResult = await self.session.list_tools()
+            logger.info("Session tools are listed")
+            return tools
+        
         except Exception:
             logger.exception("Error in list tools")
             raise
