@@ -2,9 +2,13 @@ from contextlib import AsyncExitStack
 from mcp.client.streamable_http import streamable_http_client
 from mcp.client import ClientSession
 from mcp import ListToolsResult,ListResourcesResult
+from langchain.agents import create_agent
+from langchain_mcp_adapters.tools import load_mcp_tools
+
 
 from configurations.configs import BASE_DIR
 from configurations.logger import get_logger
+from llms.llm_handler import LLMHandler
 
 
 logger = get_logger("mcp-client")
@@ -15,6 +19,7 @@ class MCPClient:
         
         try:
             self.agent = ai_agent
+            self.client_llm_handler = LLMHandler(temperature=0.2)
             self.root_dir = root_dir
             self.server_url = server_url
             self.session = None
@@ -95,3 +100,23 @@ class MCPClient:
             logger.exception("Error in session resources listing")
             raise
     
+    async def init_agent(self):
+        
+        try:
+            
+            if not self.agent is None:
+                logger.info("Agent is already running") 
+                
+            tools = await load_mcp_tools(self.session)
+            logger.info("Tools are listed")
+            
+            self.agent = create_agent(
+                model=self.client_llm_handler.get_llm(),
+                tools=tools,
+                system_prompt="""
+                """
+            )
+            
+        except Exception:
+            logger.exception("Error in init agent")
+            raise 

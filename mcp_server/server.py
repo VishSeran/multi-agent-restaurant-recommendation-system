@@ -5,13 +5,16 @@ from fastmcp import FastMCP
 from agent_workflow.workflow import MultiAgentWorkflow
 from configurations.configs import CULINARY_MAP_DIR, RECIPE_DIR, RESTAURANT_DIR, USER_REVIEW_DIR, BASE_DIR
 from configurations.logger import get_logger
+from retriever.restaurant_retriever import RestaurantRetriever
+from vectore_store.images_db import ImageVectorDB
+from vectore_store.restaurants_db import RestaurantVectorDB
 
 
 logger = get_logger("mcp-server")
 
 class MCPServer:
     
-    def __init__(self):
+    def __init__(self, image_db:ImageVectorDB, restaurant_db:RestaurantVectorDB, retriever:RestaurantRetriever):
         
         try:
             
@@ -32,7 +35,12 @@ class MCPServer:
                 clearly indicate what additional details are required.
                 """,
             )
-            self.workflow = MultiAgentWorkflow()
+            self.workflow = MultiAgentWorkflow(
+                image_db=image_db,
+                restaurant_db=restaurant_db,
+                retriever=retriever
+            )
+            
             self.register_tools()
             
         except Exception:
@@ -178,6 +186,17 @@ class MCPServer:
             except Exception:
                 await ctx.error("Unexpected server error")
                 logger.exception("Unexpected server error in %s", file_name)
+                raise
+            
+        
+        @self.mcp.tool()
+        async def restaurant_recommendation(self, user_id, query, ctx:Context):
+            
+            try:
+                
+            except Exception as e:
+                await ctx.error(f'Error in restaurant recommendation: {e}')
+                logger.exception("Error in restaurant recommendation")
                 raise
             
             
