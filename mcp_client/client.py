@@ -95,3 +95,13 @@ class MCPClient:
             logger.exception("Error in session resources listing")
             raise
     
+    async def init_agent(self):
+        
+        try:
+            
+            if not self.agent is None:
+                logger.info("Agent is already running") 
+            
+        except Exception:
+            logger.exception("Error in init agent")
+            raise 
