@@ -318,6 +318,7 @@ class MultiAgentWorkflow:
             
             return {
                 "relevance": result.get("relevance_result"),
+                "food_analyst": result.get("food_analyst", ""),
                 "final_recommendation": result.get("final_recommendation", [])
             }
             
