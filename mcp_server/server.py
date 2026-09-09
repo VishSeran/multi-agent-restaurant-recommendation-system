@@ -190,9 +190,18 @@ class MCPServer:
             
         
         @self.mcp.tool()
-        async def restaurant_recommendation(self, user_id, query, ctx:Context):
+        async def restaurant_recommendation(user_id, query, ctx:Context, image_query:str = ""):
             
             try:
+                
+                result = await self.workflow.run(
+                    user_id=user_id,
+                    user_query=query,
+                    image_query=image_query
+                )
+                
+                logger.info("Restuarant recommendation result is fetched")
+                return result
                 
             except Exception as e:
                 await ctx.error(f'Error in restaurant recommendation: {e}')
