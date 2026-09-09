@@ -190,7 +190,14 @@ class MCPServer:
             
         
         @self.mcp.tool()
-        async def restaurant_recommendation(self, user_id, query)
+        async def restaurant_recommendation(self, user_id, query, ctx:Context):
+            
+            try:
+                
+            except Exception as e:
+                await ctx.error(f'Error in restaurant recommendation: {e}')
+                logger.exception("Error in restaurant recommendation")
+                raise
             
             
         @self.mcp.resource()
