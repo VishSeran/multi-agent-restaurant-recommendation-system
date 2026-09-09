@@ -188,6 +188,10 @@ class MCPServer:
                 logger.exception("Unexpected server error in %s", file_name)
                 raise
             
+        
+        @self.mcp.tool()
+        async def restaurant_recommendation(self, user_id, query)
+            
             
         @self.mcp.resource()
         async def get_clinary_map(ctx:Context) -> str:

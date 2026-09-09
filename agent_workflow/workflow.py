@@ -38,6 +38,7 @@ class MultiAgentWorkflow:
     
     def build_workflow(self):
         
+        
         try:
             
             graph = StateGraph(WorkflowState)
@@ -294,6 +295,14 @@ class MultiAgentWorkflow:
         except Exception:
             logger.exception("Error in relevancy manager")
             raise
+        
+    async def run(self,
+                user_id,
+                user_query,
+                image_query = "",
+                user_reviews: list[dict] = None,
+                user_profile: dict = None
+                  )
         
         
     
