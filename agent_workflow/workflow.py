@@ -298,11 +298,32 @@ class MultiAgentWorkflow:
         
     async def run(self,
                 user_id,
-                user_query,
-                image_query = "",
+                user_query:str,
+                image_query:str = "",
                 user_reviews: list[dict] = None,
                 user_profile: dict = None
-                  )
+                ):
+        
+        try:
+            
+            initial_state:WorkflowState = {
+                "user_id":user_id,
+                "query":user_query,
+                "image_query":image_query,
+                "user_profile":user_profile,
+                "user_reviews":user_reviews
+            }
+            
+            result = await self.workflow.ainvoke(initial_state)
+            
+            return {
+                "relevance": result.get("relevance_result"),
+                "final_recommendation": result.get("final_recommendation", [])
+            }
+            
+        except Exception:
+            logger.exception("Error in workflow run")
+            raise
         
         
     
