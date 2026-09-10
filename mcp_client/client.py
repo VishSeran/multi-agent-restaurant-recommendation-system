@@ -157,9 +157,24 @@ class MCPClient:
             raise 
         
         
-    async def get_ai_client_response(self):
+    async def get_ai_client_response(self, query):
         
         try:
+            
+            if not query:
+                raise ValueError("User query is missing")
+            
+            response = await self.agent.ainvoke({
+                "messages": [
+                    (
+                        "user",
+                        query
+                    )
+                ]
+            })
+            
+            logger.info("AI client response is fetched")
+            return response
             
         except Exception:
             logger.exception("Error in get ai client response")
