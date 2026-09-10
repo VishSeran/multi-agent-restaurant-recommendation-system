@@ -188,3 +188,15 @@ class MCPClient:
         except Exception:
             logger.exception("Error in get ai client response")
             raise
+        
+        
+    async def close(self):
+        
+        
+        try:
+            await self.exit_stack.aclose()
+            self.agent = None
+            
+        except Exception:
+            logger.exception("Error closing MCP client")
+            raise
