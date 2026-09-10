@@ -155,3 +155,12 @@ class MCPClient:
         except Exception:
             logger.exception("Error in init agent")
             raise 
+        
+        
+    async def get_ai_client_response(self):
+        
+        try:
+            
+        except Exception:
+            logger.exception("Error in get ai client response")
+            raise
