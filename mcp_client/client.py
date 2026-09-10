@@ -55,7 +55,7 @@ class MCPClient:
                     write,
                 )
             )
-            self.session.initialize()
+            await self.session.initialize()
             
             self.connected = True
             logger.info('Client session in initiated')
@@ -106,9 +106,16 @@ class MCPClient:
             
             if not self.agent is None:
                 logger.info("Agent is already running") 
+                return
+            
+            if self.session is None or not self.connected:
+                raise RuntimeError("MCP client is not connected")
                 
             tools = await load_mcp_tools(self.session)
-            logger.info("Tools are listed")
+            logger.info(
+                "Loaded %d MCP tools",
+                len(tools)
+            )
             
             self.agent = create_agent(
                 model=self.client_llm_handler.get_llm(),
@@ -161,15 +168,17 @@ class MCPClient:
         
         try:
             
-            if not query:
+            if not query or  not query.strip():
                 raise ValueError("User query is missing")
             
             response = await self.agent.ainvoke({
                 "messages": [
-                    (
-                        "user",
-                        query
-                    )
+                    
+                    {
+                        "role":"user",
+                        "content": query
+                    }
+                    
                 ]
             })
             
