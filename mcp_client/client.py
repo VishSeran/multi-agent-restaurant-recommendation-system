@@ -5,7 +5,6 @@ from mcp import ListToolsResult,ListResourcesResult
 from langchain.agents import create_agent
 from langchain_mcp_adapters.tools import load_mcp_tools
 
-
 from configurations.configs import BASE_DIR
 from configurations.logger import get_logger
 from llms.llm_handler import LLMHandler
@@ -188,18 +187,21 @@ class MCPClient:
         except Exception:
             logger.exception("Error in get ai client response")
             raise
-        
-        
+    
+    
+     
     async def close(self):
-        
         
         try:
             await self.exit_stack.aclose()
+            
             self.agent = None
             self.session = None
-            
             logger.info("MCP client has closed")
             
         except Exception:
             logger.exception("Error closing MCP client")
             raise
+        
+    
+    
