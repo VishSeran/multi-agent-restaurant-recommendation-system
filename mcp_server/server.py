@@ -209,7 +209,7 @@ class MCPServer:
                 raise
             
             
-        @self.mcp.resource()
+        @self.mcp.resource("file://workspace/{filename}")
         async def get_clinary_map(ctx:Context) -> str:
             
             """The full raw California Culinary Map.

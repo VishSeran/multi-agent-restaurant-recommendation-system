@@ -1,6 +1,6 @@
 from contextlib import AsyncExitStack
 from mcp.client.streamable_http import streamable_http_client
-from mcp.client import ClientSession
+from mcp import ClientSession
 from mcp import ListToolsResult,ListResourcesResult
 from langchain.agents import create_agent
 from langchain_mcp_adapters.tools import load_mcp_tools
@@ -21,7 +21,7 @@ class MCPClient:
             self.client_llm_handler = LLMHandler(temperature=0.2)
             self.root_dir = root_dir
             self.server_url = server_url
-            self.session = None
+            self.session:ClientSession = None
             self.exit_stack = AsyncExitStack()
             self.connected = False
             
@@ -42,7 +42,7 @@ class MCPClient:
             
             mcp_url = f"{self.server_url}/mcp"
             
-            read,write,s_id = await self.exit_stack.enter_async_context(
+            read, write, s_id = await self.exit_stack.enter_async_context(
                 streamable_http_client(mcp_url)
             ) 
             
@@ -98,7 +98,24 @@ class MCPClient:
         except Exception:
             logger.exception("Error in session resources listing")
             raise
-    
+        
+    async def read_resource_from_server(self,uri):
+        
+        try:
+            
+            if not uri:
+                uri = "cuilnarymap"
+                
+            resource_result = await self.session.read_resource(uri)
+            logger.info("server resources are fetched")
+            
+            return resource_result
+            
+        except Exception:
+            logger.exception("Error in read_resource_from_server")
+            raise
+
+   
     async def init_agent(self):
         
         try:
@@ -187,9 +204,8 @@ class MCPClient:
         except Exception:
             logger.exception("Error in get ai client response")
             raise
-    
-    
-     
+
+
     async def close(self):
         
         try:
@@ -202,6 +218,9 @@ class MCPClient:
         except Exception:
             logger.exception("Error closing MCP client")
             raise
+        
+        
+    
         
     
     
