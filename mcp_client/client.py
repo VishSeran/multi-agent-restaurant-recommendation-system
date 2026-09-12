@@ -99,7 +99,7 @@ class MCPClient:
             logger.exception("Error in session resources listing")
             raise
         
-    async def read_resource_from_server(self,uri):
+    async def read_resource_from_server(self, uri:str | None):
         
         try:
             
