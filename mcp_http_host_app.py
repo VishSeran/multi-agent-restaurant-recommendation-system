@@ -32,15 +32,27 @@ class MCPHttpHostApp:
             raise
         
     
-    async def get_client_response(self,query):
+    async def conversation(self, user_query:str):
         
         try:
             
+            if not user_query:
+                raise ValueError("User query is missing")
             
-        except ValueError:
-            logger.exception("Value error")
+            print("Type q or quit to exit the conversation")
+            
+            
+            if user_query.strip().lower() in (('q', 'quit')):
+                print("Exiting the convesation...")
+                break
+            
+        except ValueError as e:
+            logger.error("value error in conversation")
             raise
         
         except Exception:
-            logger.exception("Error in get client response")
+            logger.exception("Error in conversation")
             raise
+        
+        
+        
