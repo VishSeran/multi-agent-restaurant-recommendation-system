@@ -5,6 +5,10 @@ from configurations.logger import get_logger
 
 logger = get_logger("configs")
 
+FOOD_RECIPE_URL = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/hpTjb6liKBLVHQK0UgMi5A/Recipes.json"
+USER_REVIEWS_URL = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/fQUs9wQ6aB6ts6fmkD2V2w/Synthetic-User-Reviews.json"
+FOOD_IMAGES_URL = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/5_Rr6ohviItzucyWk6nkrw/synthetic-recipe-images.zip"
+
 GROQ_MODEL = "llama-3.1-8b-instant"
 VISION_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
 TEXT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
