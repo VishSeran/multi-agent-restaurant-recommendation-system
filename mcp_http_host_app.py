@@ -21,7 +21,7 @@ class MCPHttpHostApp:
             raise
         
         
-    async def connect_with_client(self):
+    async def connect_with_client_server(self):
         
         try:
             
@@ -59,6 +59,17 @@ class MCPHttpHostApp:
             except Exception:
                 logger.exception("Error in conversation")
                 raise
+            
+            
+    async def get_culinary_list(self):
+        
+        try:
+            result = await self.mcp_client.read_resource_from_server()
+            return result
+            
+        except Exception:
+            logger.exception("Error in get culinary list")
+            raise
             
         
         
