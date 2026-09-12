@@ -9,12 +9,12 @@ logger = get_logger("mcp-http-host-app")
 
 class MCPHttpHostApp:
     
-    def __init__(self, mcp_server, mcp_client):
+    def __init__(self, mcp_server:MCPServer, mcp_client:MCPClient):
         
         try:
             
-            self.mcp_client:MCPClient = mcp_client
-            self.mcp_server:MCPServer = mcp_server
+            self.mcp_client = mcp_client
+            self.mcp_server = mcp_server
             
         except Exception:
             logger.exception("Error in Http host app")
@@ -27,6 +27,8 @@ class MCPHttpHostApp:
             
             await self.mcp_client.connect_to_server()
             logger.info("client-server connected successfully")
+            
+            await self.mcp_client.init_agent()
             
         except Exception:
             logger.exception("Error in connect with client")
@@ -70,6 +72,11 @@ class MCPHttpHostApp:
         except Exception:
             logger.exception("Error in get culinary list")
             raise
+        
+    async def close_connection(self):
+        
+        self.mcp_client.close()
+    
             
         
         
