@@ -15,21 +15,30 @@ async def main():
         data_extractor = DataExtractor()
     
         #load datasets
-        data_extractor.load_dataset(url=FOOD_RECIPE_URL,
+        await data_extractor.load_dataset(url=FOOD_RECIPE_URL,
                                     file_name= "Recipes.json",
                                     directory="food_recipes")
         
-        data_extractor.load_dataset(
+        await data_extractor.load_dataset(
             url=USER_REVIEWS_URL,
             file_name="Synthetic-User-Reviews.json",
             directory="user_reviews"
         )
         
-        data_extractor.load_dataset(
+        await data_extractor.load_dataset(
             url=FOOD_IMAGES_URL,
             file_name="synthetic-recipe-images.zip",
             directory="synthetic_recipe_images"
         )
+        
+        #format restaurants data
+        await data_extractor.get_restaurants_data()
+        
+        #format recipe data
+        await data_extractor.combine_food_recipe_data_with_image_description()
+        
+        #formate user reviews
+        await data_extractor.summarize_user_reviews()
         
     except Exception:
         logger.exception("Error in main")

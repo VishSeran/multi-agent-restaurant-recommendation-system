@@ -68,6 +68,7 @@ class DataExtractor:
                         raise FileNotFoundError(f"File not found and no URL provided: {path}")
                         
             if url:
+                
                 if not file_name:
                     raise ValueError(
                         "File path must be provided when downloading data"
