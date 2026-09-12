@@ -211,13 +211,17 @@ class MCPClient:
         try:
             await self.exit_stack.aclose()
             
+        except Exception:
+            logger.exception("Error closing MCP client")
+            raise
+            
+        finally:
+            
             self.agent = None
             self.session = None
             logger.info("MCP client has closed")
             
-        except Exception:
-            logger.exception("Error closing MCP client")
-            raise
+        
         
         
     
