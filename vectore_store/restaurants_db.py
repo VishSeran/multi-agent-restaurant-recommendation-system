@@ -30,6 +30,8 @@ class RestaurantVectorDB:
         
         logger.info("Restaurant chroma db initiated")
         
+        self.create_restaurant_vector_store()
+        
         
     def create_restaurant_vector_store(self):
         

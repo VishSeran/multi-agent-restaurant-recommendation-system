@@ -30,6 +30,8 @@ class ImageVectorDB:
             self.recipe_data = recipe_data
             self.image_handler = ImageRecipeHandler()
             
+            self.create_food_image_vector_store()
+            
         except ValueError:
             logger.exception("Value error in image vector db")
             raise
